@@ -96,6 +96,14 @@
       "metadata": {
         "type": "object",
         "additionalProperties": { "type": "string" }
+      },
+      "index-response": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "number"
+          }
+        }
       }
     }
   },

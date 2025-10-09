@@ -1,5 +1,6 @@
 import CliConfig from './CliConfig.js'
-import ServerManager, {jsonTypes, OPENAPI_FILENAME} from './ServerManager.js'
+import ServerManager, {OPENAPI_FILENAME} from './ServerManager.js'
+import { jsonTypes } from './utils.js'
 import {logerror, logq, q, logcode, logh1, logem, logp, code} from './logging.js'
 import readlineSync from 'readline-sync'
 import {printList} from './print-helper.js'

@@ -2,7 +2,7 @@ import Commands, {printCommands} from './Commands.js'
 import Types, {printTypes} from './Types.js'
 import CliConfig from './CliConfig.js'
 import Initialiser from './Initialiser.js'
-// import ServiceManager from './ServiceManager'
+import ServiceManager from './ServiceManager.js'
 // import DatatypeManager from './DatatypeManager'
 import {logh1, logcode, logp, logerror, code, desc} from './logging.js'
 import ServerManager from './ServerManager.js'
@@ -103,8 +103,8 @@ export default class CliApplication {
     switch(type) {
       case Types.server:
         return new ServerManager(this.options)
-		// case Types.service:
-		// 	return new ServiceManager(this.options)
+		case Types.service:
+			return new ServiceManager(this.options)
 		case Types.datatype:
 			return new DatatypeManager(this.options)
     // case Types.repository:

@@ -5,14 +5,6 @@ import CliConfig from './CliConfig.js'
 export const OPENAPI_FILENAME: string = "openapi.json"
 export const CONFIG_FILENAME: string = "blackbox.json"
 export const PACKAGE_FILENAME: string = "package.json"
-export const jsonTypes:string[] = [
-  "string",
-  "integer",
-  "number",
-  "boolean",
-  "array",
-  "object"
-]
 
 export default class ServerManager {
   openapiDoc: any
@@ -130,7 +122,20 @@ export default class ServerManager {
 		return this.getSchemaParentByPath(path).schema
 	}
 
-	getSchemaParentByPath(path:string):any {
-		return this.openapiDoc.paths[path].get.responses['200'].content['application/json']
+  blackboxToOpenapiPath(bbPath: string) {
+    for(let p in this.openapiDoc.paths) {
+      if(p.replaceAll(/\{[^}]+\}/gm, '#') === bbPath) {
+        return p
+      }
+    }
+    return undefined
+  }
+
+	getSchemaParentByPath(bbPath:string):any {
+    let p = this.blackboxToOpenapiPath(bbPath)
+    if(p && this.openapiDoc.paths[p].get?.responses?.['200']?.content?.['application/json']) {
+      return this.openapiDoc.paths[p].get.responses['200'].content['application/json']
+    }
+    throw new Error("No schema found for path "+p)
 	}
 }

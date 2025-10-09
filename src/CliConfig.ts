@@ -7,17 +7,20 @@ export default class CliConfig {
   name?:string
   title?:string
   description?:string
-  // service:string = "";
-  // datatype:string = "";
-  // methods:string = "post,put,patch,delete";
+  // service?:string
+  datatype?:string
+  methods:string = "get,post,put,patch,delete"
   // all:boolean = false;
-  // summary:String = "";
+  summary?:string
   file?:string
+  path?:string
   // url:string = "";
   // dest:string = "";
   // verbose:boolean = false;
   // singular:string = "";
   sourceData:string | undefined
+  access?: 'unique' | 'id' | 'index' = 'id'
+  identifier?: string
 
   constructor(args:string[]) {
     program
@@ -27,10 +30,13 @@ export default class CliConfig {
     	.option('-n, --name <name>', "The name of the entity being added or modified.")
     	.option('-t, --title <title>', "The title of the API.")
     	.option('--desc <description>', 'The description of the API.')
-      .option('-s, --service <service>', "The parent service in the case of sub-services. Defaults to no parent; i.e. a root level service.")
-      .option('--singular <singular>', "The singular form of the service name when using plural service paths. Used for the operationId.")
-    	.option('-d, --datatype <datatype>', "The data type of a service.")
-    	.option('-m, --methods <methods>', "The HTTP methods to be supported by the service.")
+      // .option('-s, --service <service>', "The parent service in the case of sub-services. Defaults to no parent; i.e. a root level service.")
+      .option('-p, --path <path>', "The path to the parent node in the case of sub-services. Use # as value placeholders. Defaults to the root node.")
+      // .option('--singular <singular>', "The singular form of the service name when using plural service paths. Used for the operationId.")
+      .option('--access <access>', "The access type for the service. One of 'unique', 'id' or 'index'.")
+      .option('-i, --identifier <identifier>', "The identifier field for the service. E.g. 'id' or 'name'. Required if access is 'id' or 'index'.")
+      .option('-d, --datatype <datatype>', "The data type of a service.")
+    	.option('-m, --methods <methods>', "A comma separated list of HTTP methods to be supported by the service.")
     	.option('-a, --all', "Apply operation to all relevant items. E.g. bb delete service -a -n s1 will remove service s1 and any child services.")
       .option('-f, --file <file>', "A source file to read in data appropriate to the command and type.")
       .option('-u, --url <url>', "A source url to read in data appropriate to the command and type.")
@@ -52,7 +58,18 @@ export default class CliConfig {
         this.description = opts[opt]; break
       case 'file':
         this.file = opts[opt]; break
-      
+      case 'datatype':
+        this.datatype = opts[opt]; break
+      case 'path':
+        this.path = opts[opt]; break
+      case 'summary':
+        this.summary = opts[opt]; break
+      case 'methods':
+        this.methods = opts[opt]; break
+      case 'access':
+        this.access = opts[opt]; break
+      case 'identifier':
+        this.identifier = opts[opt]; break
       }
     })
 
@@ -65,9 +82,15 @@ export default class CliConfig {
   //   return this.service === '' ? "/"+this.name : "/"+this.service+"/"+this.name
   // }
 
-  // serviceTag():string {
-  //   return this.service === '' ? this.name : this.service
-  // }
+  serviceTag():string {
+    if(this.name) {
+      return this.name
+    }
+    // if(this.service) {
+    //   return this.service
+    // }
+    throw new Error("No name or service provided for service tag.")
+  }
 
   describeOptions(prefix:string, format = defaultFormat):string {
     const colWidth = maxLength( program.options.map((opt:Option) => opt.flags) )
@@ -77,9 +100,9 @@ export default class CliConfig {
     ) ).reduce((accumulator:string, currentValue:string) => accumulator + currentValue + '\n', '')
   }
 
-  // methodsSet():string[] {
-	// 	return this.methods.split(",")
-	// }
+  methodsSet():string[] {
+		return this.methods.split(",")
+	}
 
   /**
    * Lazily load the JSON data from file.
