@@ -1,0 +1,136 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Blackbox API Template",
+    "version": "0.1.0",
+    "description": "This template provides a starting point for a Blackbox API with only a root node."
+  },
+  "components": {
+    "parameters": {
+      "query-meta": {
+        "in": "query",
+        "name": "meta",
+        "schema": {
+          "type": "boolean"
+        },
+        "required": false,
+        "description": "Get metadata instead of the service or object."
+      }
+    },
+    "schemas": {
+      "oas3schema": {
+        "type": "object",
+        "required": ["type"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["object", "array", "string", "number", "boolean", "integer"]
+          },
+          "properties": { 
+            "type": "object",
+            "additionalProperties": {"$ref": "#/components/schemas/oas3schema"}
+          },
+          "items": {"$ref": "#/components/schemas/oas3schema"},
+          "required": {
+            "type": "array",
+            "items": {"type": "string"}
+          }
+        }
+      },
+      "service": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string",
+            "format": "uri"
+          },
+          "access": {
+            "type": "string",
+            "enum": ["index", "id", "unique"]
+          },
+          "identifier": {
+            "type": "string"
+          },
+          "type": {
+            "type": "object",
+            "properties": {
+              "format": {
+                "type": "string",
+                "enum": ["oas3"]
+              },
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "href": {
+                        "type": "string",
+                        "format": "uri"
+                      }
+                    }
+                  },
+                  {
+                    "$ref": "#/components/schemas/oas3schema"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "service-list": {
+        "type": "object",
+        "properties": {
+          "services": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/service" }
+          }
+        }
+      },
+      "metadata": {
+        "type": "object",
+        "additionalProperties": { "type": "string" }
+      }
+    }
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "A list of services provided by this API.",
+        "operationId": "getRootService",
+        "tags": [
+          "root"
+        ],
+        "responses": {
+          "200": {
+            "description": "200 OK Response: The list of services.",
+            "content": {
+              "application/json": {
+                "schema": { 
+                  "allOf": [
+                    {"$ref": "#/components/schemas/service-list" },
+                    {"$ref": "#/components/schemas/metadata" }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "operationId": "getOptions",
+        "responses": {
+          "200": {
+            "description": "List all available HTTP methods."
+          }
+        }
+      }
+    }
+  }
+}

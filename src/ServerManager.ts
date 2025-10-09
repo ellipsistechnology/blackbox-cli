@@ -1,0 +1,136 @@
+import fs from 'fs'
+import {code, logem, logerror} from './logging.js'
+import CliConfig from './CliConfig.js'
+
+export const OPENAPI_FILENAME: string = "openapi.json"
+export const CONFIG_FILENAME: string = "blackbox.json"
+export const PACKAGE_FILENAME: string = "package.json"
+export const jsonTypes:string[] = [
+  "string",
+  "integer",
+  "number",
+  "boolean",
+  "array",
+  "object"
+]
+
+export default class ServerManager {
+  openapiDoc: any
+  bbDoc: any
+
+	constructor(
+    public config: CliConfig
+  ) {}
+
+  async update() {
+    try {
+      // Update the OpenAPI document:
+      await this.loadOpenApiJson()
+      let changed = false
+      if(this.config.title) {
+        this.openapiDoc.info.title = this.config.title
+        changed = true
+      }
+      if(this.config.description) {
+        this.openapiDoc.info.description = this.config.description
+        changed = true
+      }
+      if(changed) {
+        this.writeApiJson()
+        logem(`Updated Open API configuration.`)
+      }
+      
+      // Update the Blackbox config:
+      await this.loadConfigJson()
+      changed = false
+      if(this.config.name) {
+        this.bbDoc.name = this.config.name
+        changed = true
+      }
+      if(changed) {
+        this.writeConfigJson()
+        logem(`Updated Blackbox configuration.`)
+      }
+    } catch(err: any) {
+      logerror(err.toString())
+    }
+  }
+
+  async loadConfigJson() {
+    return new Promise<void>( (resolve, reject) => {
+      fs.readFile(CONFIG_FILENAME, (err:any, data:any) => {
+        if(err) {
+          logerror("Error reading Blackbox config in file "+CONFIG_FILENAME
+            +". Have you initialised your Blackbox api: bb init")
+          reject(err)
+        }
+        else {
+          this.bbDoc = JSON.parse(data)
+          resolve()
+        }
+      })
+    })
+  }
+
+	loadOpenApiJson():Promise<void> {
+    return new Promise( (resolve, reject) => {
+      fs.readFile(OPENAPI_FILENAME, (err:any, data:any) => {
+        if(err) {
+          logerror("Error reading OpenAPI document in file "+OPENAPI_FILENAME
+            +". Have you initialised your Blackbox api: bb init")
+          reject(err)
+        }
+        else {
+          this.openapiDoc = JSON.parse(data)
+          resolve()
+        }
+      })
+    })
+	}
+
+  async loadPackageJson(): Promise<any> {
+    return new Promise<any>( (resolve, reject) => {
+      fs.readFile(PACKAGE_FILENAME, (err:any, data:any) => {
+        if(err) {
+          logerror("Error reading "+PACKAGE_FILENAME)
+          reject(err)
+        }
+        else {
+          resolve(JSON.parse(data))
+        }
+      })
+    })
+  }
+
+	writeApiJson() {
+    fs.writeFile(OPENAPI_FILENAME, JSON.stringify(this.openapiDoc, null, 2), (err) => {
+      if(err)
+        console.error(`Failed to write to ${OPENAPI_FILENAME}: ${err}`)
+    })
+	}
+
+  writeConfigJson() {
+    fs.writeFile(CONFIG_FILENAME, JSON.stringify(this.bbDoc, null, 2), (err) => {
+      if(err)
+        console.error(`Failed to write to ${CONFIG_FILENAME}: ${err}`)
+    })
+  }
+
+  writePackageJson(json: any) {
+    fs.writeFile(PACKAGE_FILENAME, JSON.stringify(json, null, 2), (err) => {
+      if(err)
+        console.error(`Failed to write to ${PACKAGE_FILENAME}: ${err}`)
+    })
+  }
+	getSchemas():any {
+		return this.openapiDoc.components.schemas
+	}
+
+	getSchemaByPath(path:string):any {
+		return this.getSchemaParentByPath(path).schema
+	}
+
+	getSchemaParentByPath(path:string):any {
+		return this.openapiDoc.paths[path].get.responses['200'].content['application/json']
+	}
+}

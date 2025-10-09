@@ -1,0 +1,33 @@
+{
+  "name": "blackbox-cli",
+  "version": "1.1.0",
+  "description": "Blackbox command line interface.",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "test": "npm run clean && npm run build && cd test && ./test.sh",
+    "dev": "node --loader ts-node/esm ./index.ts",
+    "start": "node ./dist/index.js",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ellipsistechnology/blackbox-cli.git"
+  },
+  "author": "Ben Millar",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ellipsistechnology/blackbox-cli/issues"
+  },
+  "homepage": "https://github.com/ellipsistechnology/blackbox-cli#readme",
+  "dependencies": {
+    "chalk": "^5.6.2",
+    "commander": "^14.0.1",
+    "readline-sync": "^1.4.10"
+  },
+  "devDependencies": {
+    "@types/node": "^24.7.0",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2"
+  }
+}
