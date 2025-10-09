@@ -10,7 +10,7 @@ export default class CliConfig {
   // service?:string
   datatype?:string
   methods:string = "get,post,put,patch,delete"
-  // all:boolean = false;
+  all:boolean = false
   summary?:string
   file?:string
   path?:string
@@ -70,6 +70,8 @@ export default class CliConfig {
         this.access = opts[opt]; break
       case 'identifier':
         this.identifier = opts[opt]; break
+      case 'all':
+        this.all = opts[opt]; break
       }
     })
 

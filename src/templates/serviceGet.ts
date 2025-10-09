@@ -2,9 +2,8 @@ import { get } from 'http'
 import { jsonTypes, makeContentSchema } from '../utils.js'
 
 export default function (
-    {operationId, description, datatype, access, identifier}: {
+    {operationId, datatype, access, identifier}: {
         operationId: string,
-        description?: string,
         datatype: string,
         access?: 'unique' | 'id' | 'index',
         identifier?: string
@@ -16,7 +15,7 @@ export default function (
         "summary": 
           access === 'unique' ? `Retrieve the ${datatype} object.`
             /* id or index */ : `Retrieve a list of ${datatype} objects.`,
-        "description": description,
+        "description": `Retrieve ${access === 'unique' ? 'the' : 'a list of'} ${datatype} object${access === 'unique' ? '' : 's'}.`,
         "parameters": [
           { "$ref": "#/components/parameters/query-meta" }
         ],

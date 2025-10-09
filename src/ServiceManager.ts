@@ -1,8 +1,7 @@
 import CliConfig from './CliConfig.js'
 import ApiManager from './ServerManager.js'
-import { jsonTypes } from './utils.js'
+import { extractPathParams, jsonTypes } from './utils.js'
 import {logerror, logp, code, logem} from './logging.js'
-// import template from 'json-templater/object'
 import {printList} from './print-helper.js'
 import readlineSync from 'readline-sync'
 
@@ -13,11 +12,11 @@ import readlineSync from 'readline-sync'
 // import service_template from './templates/service-template.json' with { type: 'json' }
 // import RepositoryManager from './RepositoryManager';
 
-import DatatypeManager from './DatatypeManager.js';
+// import DatatypeManager from './DatatypeManager.js';
 import { toCammelCase } from './utils.js'
 import serviceGet from './templates/serviceGet.js'
 import servicePost from './templates/servicePost.js'
-import { access } from 'fs'
+// import { access } from 'fs'
 import objectGet from './templates/objectGet.js'
 import objectPut from './templates/objectPut.js'
 import objectPatch from './templates/objectPatch.js'
@@ -77,7 +76,6 @@ export default class ServiceManager {
       else {
         this.apiManager.openapiDoc.paths[path] = serviceGet({
           operationId: this.makeOperationId('get', this.config.access === 'unique' ? '' : 'List'),
-          description: this.config.description || '',
           datatype: this.config.datatype,
           access: this.config.access,
           identifier: this.config.identifier
@@ -90,7 +88,7 @@ export default class ServiceManager {
       const methods = this.config.methodsSet()
 
       // Add post method:
-      if(methods.includes('post')) {
+      if(methods.includes('post')) { // FIXME: response type is missing in unique subservice
         if(!this.addPostMethod(path)) {
           return // error already logged
         }
@@ -106,7 +104,7 @@ export default class ServiceManager {
           return
         }
 
-        const pathParams = this.extractPathParams(path)
+        const pathParams = extractPathParams(path)
 
         // Add the object node path parameter:
         this.apiManager.openapiDoc.components.parameters['path-'+objectNodePathId] = {
@@ -130,7 +128,7 @@ export default class ServiceManager {
         this.apiManager.openapiDoc.paths[path].put = objectPut({
           operationId: this.makeOperationId('put'),
           datatype: this.config.datatype,
-          pathParams: this.extractPathParams(path)
+          pathParams: extractPathParams(path)
         })
         logp(`Added ${code('put')} to path ${code(path)}`)
       }
@@ -140,7 +138,7 @@ export default class ServiceManager {
         this.apiManager.openapiDoc.paths[path].patch = objectPatch({
           operationId: this.makeOperationId('patch'),
           datatype: this.config.datatype,
-          pathParams: this.extractPathParams(path)
+          pathParams: extractPathParams(path)
         })
         logp(`Added ${code('patch')} to path ${code(path)}`)
       }
@@ -150,7 +148,7 @@ export default class ServiceManager {
         this.apiManager.openapiDoc.paths[path].delete = objectDelete({
           operationId: this.makeOperationId('delete'),
           datatype: this.config.datatype,
-          pathParams: this.extractPathParams(path)
+          pathParams: extractPathParams(path)
         })
         logp(`Added ${code('delete')} to path ${code(path)}`)
       }
@@ -164,32 +162,135 @@ export default class ServiceManager {
     }
   }
 
-  extractPathParams(path: string): string[] {
-    const params = []
-    const regex = /\{([^}]+)\}/g
-    let match
-    while ((match = regex.exec(path)) !== null) {
-      params.push(`${match[1]}`)
+  async update() {
+    await this.apiManager.loadOpenApiJson()
+
+    if(!this.config.path) {
+      logerror("Path not found. Use -p or --path to supply a path for the service you wish to update.")
+      return
     }
-    return params
+
+    const path = this.apiManager.blackboxToOpenapiPath(this.config.path)
+    if(!path) {
+      logerror(`Path ${this.config.path} not found.`)
+      return
+    }
+
+    // Set the name from the path:
+    const pathParts = this.config.path.split('/')
+    this.config.name = pathParts[pathParts.length-1]
+
+    let apiMethods = Object.values(this.apiManager.openapiDoc.paths[path])
+    let apiPaths = [path]
+
+    // If changing all then search sub-paths too:
+    if(this.config.all) {
+      const subPaths = Object.keys(this.apiManager.openapiDoc.paths).filter( p => p.startsWith(path+'/') )
+      subPaths.forEach( sp => {
+        apiMethods = apiMethods.concat( Object.values(this.apiManager.openapiDoc.paths[sp]) )
+        apiPaths.push(sp)
+      })
+    // If not changing all and the path is not unique then also check the sub-service path:
+    } else if( this.apiManager.openapiDoc.paths[path]['x-bb-service'] && this.apiManager.openapiDoc.paths[path]['x-bb-service'].access !== 'unique' ) {
+      const subpath = this.apiManager.blackboxToOpenapiPath(path+'/#')
+      if(subpath) {
+        apiPaths.push(subpath)
+      }
+    }
+
+    if(apiMethods.length === 0) {
+      logerror(`No service found at path ${code(path)}.`)
+      return
+    }
+      
+    // Set service datatype:
+    if(this.config.datatype) {
+      // Find all methods and change the datatype:
+      apiMethods.forEach( (method:any) => {
+        // Change request bodies:
+        if(method.requestBody && method.requestBody.content && method.requestBody.content['application/json']) {
+          if((<any>jsonTypes).includes(this.config.datatype)) {
+            method.requestBody.content['application/json'].schema = { type: this.config.datatype }
+          }
+          else {
+            method.requestBody.content['application/json'].schema = { "$ref": "#/components/schemas/"+this.config.datatype }
+          }
+        }
+        // Change response bodies:
+        if(method.responses) {
+          Object.values(method.responses).forEach( (response:any) => {
+            if(response.content && response.content['application/json']) {
+              if((<any>jsonTypes).includes(this.config.datatype)) {
+                response.content['application/json'].schema = { type: this.config.datatype }
+              }
+              else {
+                response.content['application/json'].schema = { "$ref": "#/components/schemas/"+this.config.datatype }
+              }
+            }
+          })
+        }
+      })
+
+      logp(`Updated datatype to ${code(this.config.datatype)} for service at path ${code(path)}`)
+    }
+
+    // Change methods:
+    if(this.config.methods) {
+
+      apiPaths.forEach( p => {
+
+        // Add any new methods
+        this.config.methodsSet().forEach(m => {
+          if(!(<any>Object.keys(this.apiManager.openapiDoc.paths[p])).includes(m)) {
+            switch(m) {
+              case 'post':
+                if(!this.addPostMethod(p)) {
+                  return // error already logged
+                }
+                break
+              case 'put':
+                this.apiManager.openapiDoc.paths[p].put = objectPut({
+                  operationId: this.makeOperationId('put'),
+                  datatype: this.config.datatype!,
+                  pathParams: extractPathParams(p)
+                })
+                break
+              case 'patch':
+                this.apiManager.openapiDoc.paths[p].patch = objectPatch({
+                  operationId: this.makeOperationId('patch'),
+                  datatype: this.config.datatype!,
+                  pathParams: extractPathParams(p)
+                })
+                break
+              case 'delete':
+                this.apiManager.openapiDoc.paths[p].delete = objectDelete({
+                  operationId: this.makeOperationId('delete'),
+                  datatype: this.config.datatype!,
+                  pathParams: extractPathParams(p)
+                })
+                break
+              default:
+                logerror(`Unsupported method ${m}.`)
+                return
+            }
+            logp(`Adding method ${code(m)} to service at path ${code(path)}`)
+          }
+        })
+
+        // Remove any methods not in the list:
+        Object.keys(this.apiManager.openapiDoc.paths[p]).forEach(m => {
+          if(!this.config.methodsSet().includes(m) && m !== 'options' && m !== 'get' && !m.startsWith('x-')) { // always keep options and get
+            logp(`Removing method ${code(m)} from service at path ${code(p)}`)
+            delete (<any>this.apiManager.openapiDoc.paths[p])[m]
+          }
+        })
+          
+      }) // forEach path
+    }
+
+    this.apiManager.writeApiJson()
+    logem(`Successfully updated service ${code(path)}.`)
   }
-
-  // TODO: allow for updating methods
-  // async update() {
-  //   // Set service datatype:
-	// 	if(this.config.datatype !== '') {
-  //     try {
-	// 		  const openApiJson = await this.apiManager.loadOpenApiJson()
-
-	// 			await this.setServiceDatatype(openApiJson)
-	// 			this.apiManager.writeApiJson(openApiJson)
-  //       logem(`Successfully updated service ${code(this.config.servicePath())} with datatype ${code(this.config.datatype)}`)
-  //     }
-  //     catch(err) {
-  //       logerror(`Failed to update service: ${err}`, err)
-  //     }
-	// 	}
-  // }
 
   // private addPathForService() {
 	// 	// const path = this.config.servicePath();
@@ -267,15 +368,16 @@ export default class ServiceManager {
     return true // success
   }
 
-  private makeOperationId(method:string, suffix = ''):any { // e.g. deleteDatatype
-    // const name = this.config.singular ? this.config.singular : this.config.name
-    if(!this.config.name) {
-      throw new Error("No name provided for operation ID.")
-    }
-    // const path = (this.config.path || '/').replace(/\//, '-') // to kebab-case
+  /**
+   * Ensure a valid name is given before calling this method.
+   * @param method 
+   * @param suffix 
+   * @returns 
+   */
+  private makeOperationId(method:string, suffix = ''): string { // e.g. deleteDatatype
     return (
       methodToOperation[method] +
-      toCammelCase(this.config.name) +
+      toCammelCase(this.config.name!) +
       suffix
     )
   }
@@ -453,64 +555,64 @@ export default class ServiceManager {
     // }
 	// }
 
-  // list() {
-  //   this.apiManager.loadOpenApiJson()
-  //   .then( (openApiDoc) => {
-  //     printList(Object.keys(openApiDoc.paths))
-  //   })
-  //   .catch( (err) => {
-  //     logerror(`Error loading openAPI document`)
-  //   })
-  // }
+  async list() {
+    try {
+      await this.apiManager.loadOpenApiJson()
+      printList(Object.keys(this.apiManager.openapiDoc.paths))
+    } catch(err) {
+      logerror(`Error loading openAPI document`)
+    }
+  }
 
-  // delete() {
-  //   // Validate parameters:
-  //   if(this.config.name === '') {
-  //     logerror("Name not found. Use -n or --name to supply a name for the service you wish to delete.")
-  //     return
-  //   }
+  async delete() {
+    // Validate parameters:
+    if(!this.config.path) {
+      logerror("Path not found. Use -p or --path to supply a path for the service you wish to delete.")
+      return
+    }
 
-  //   // Prompt user for confirmation to delete:
-	// 	let message = "Are you sure you want to delete service "+this.config.servicePath()+(this.config.all?" and all it's children":"")+"? (y/n): "
-	// 	if(readlineSync.question(message) === 'y') {
+    await this.apiManager.loadOpenApiJson()
+    
+    let servicePath = this.apiManager.blackboxToOpenapiPath(this.config.path)
+    if(!servicePath) {
+      logerror(`Path ${this.config.path} not found.`)
+      return
+    }
 
-  //     this.apiManager.loadOpenApiJson()
-  //     .then( (openApiJson) => {
-  //       // Find the path to delete:
-  // 			let servicePath = this.config.servicePath()
-  // 			if(openApiJson.paths[servicePath]) {
+    // Prompt user for confirmation to delete:
+		let message = "Are you sure you want to delete service "+this.config.path+(this.config.all?" and all it's children":"")+"? (y/n): "
+		if(readlineSync.question(message) === 'y') {
+      // Find the path to delete:
+      if(!this.apiManager.openapiDoc.paths[servicePath]) {
+        logerror(`Service not found for path ${code(servicePath)}.`)
+        return
+      }
 
-  // 				// Delete the service:
-  // 				logp("Deleting path "+code(servicePath));
-  // 				openApiJson.paths[servicePath] = undefined
-  // 				let servicePathWithName = servicePath+"/{name}"
-  // 				if(openApiJson.paths[servicePathWithName]) {
-  // 					logp("Deleting path "+code(servicePathWithName))
-  // 					openApiJson.paths[servicePathWithName] = undefined
-  // 				}
+      // Delete the service and its sub-service if it exists:
+      logp("Deleting path "+code(servicePath));
+      delete this.apiManager.openapiDoc.paths[servicePath]
 
-  // 				// Delete any child services:
-  // 				if(this.config.all) {
-  // 					Object.keys(openApiJson.paths)
-  // 						.filter((key) => key.startsWith(servicePath+"/"))
-  // 						.forEach((key) => {
-  // 							logp("Deleting path "+code(key))
-  // 							openApiJson.paths[key] = undefined
-  // 						})
-  // 				}
+      // Delete any child services if -a/--all specified:
+      if(this.config.all) {
+        Object.keys(this.apiManager.openapiDoc.paths)
+          .filter((key) => key.startsWith(servicePath+"/"))
+          .forEach((key) => {
+            logp("Deleting path "+code(key))
+            delete this.apiManager.openapiDoc.paths[key]
+          })
+      // If not unique then also delete the sub-service path:
+      } else {
+        let servicePathWithName = this.apiManager.blackboxToOpenapiPath(servicePath+"/#")
+        if(servicePathWithName && this.apiManager.openapiDoc.paths[servicePathWithName]) {
+          logp("Deleting path "+code(servicePathWithName))
+          this.apiManager.openapiDoc.paths[servicePathWithName] = undefined
+        }
+      }
 
-  // 				// Write changes:
-  // 				this.apiManager.writeApiJson(openApiJson)
+      // Write changes:
+      this.apiManager.writeApiJson()
 
-  //         logem(`Successfully deleted service ${code(servicePath)}.`)
-  // 			}
-  // 			else {
-  // 				logerror(`Service not found for path ${code(servicePath)}.`)
-  // 			}
-  //     })
-  //     .catch( (err) => {
-  //       logerror(`Error loading openAPI document: ${err}`, err)
-  //     })
-	// 	}
-  // }
+      logem(`Successfully deleted service ${code(servicePath)}.`)
+    }
+  }
 }

@@ -90,7 +90,11 @@ export default class CliApplication {
         const manager = this.manager(type)
 
         if(manager && (<any>manager)[command]) {
-          (<any>manager)[command]() // call the relevant command on the manager
+          try {
+            (<any>manager)[command]() // call the relevant command on the manager
+          } catch(err) {
+            logerror(`Failed to ${command} ${type}:`, err)
+          }
         } else {
           logerror(`Operation ${command} is not applicable to type ${this.args[1]}.`)
         }

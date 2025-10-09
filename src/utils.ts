@@ -44,3 +44,13 @@ export const jsonTypes: string[] = [
   "array",
   "object"
 ]
+
+export function extractPathParams(path: string): string[] {
+  const params = []
+  const regex = /\{([^}]+)\}/g
+  let match
+  while ((match = regex.exec(path)) !== null) {
+    params.push(`${match[1]}`)
+  }
+  return params
+}
