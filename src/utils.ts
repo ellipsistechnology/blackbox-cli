@@ -63,6 +63,13 @@ export const reservedTypes: string[] = [
 ]
 reservedTypes.push(...jsonTypes)
 
+// export const importMap = {
+//   Service: 'blackbox-services',
+//   ServiceLinks: 'blackbox-services',
+//   ServiceLink: 'blackbox-services',
+//   ServiceType: 'blackbox-services',
+// }
+
 export const pathParamRegex = /\{([^}]+)\}/g
 
 /**
