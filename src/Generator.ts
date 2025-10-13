@@ -20,8 +20,10 @@ import serviceTemplate from "./templates/serviceTemplate.js"
 
 import datatypeTemplate from "./templates/datatypeTemplate.js"
 
-import { toCammelCase, jsonTypes, reservedTypes } from "./utils.js"
+import { toCammelCase, jsonTypes, reservedTypes, schemaToClassMap } from "./utils.js"
 import ServerManager from "./ServerManager.js"
+import { TemplateMap } from "./templates/serviceTemplate.js"
+import controllerTemplate from "./templates/controllerTemplate.js"
 
 // const {exec} = require('child_process')
 // const {resolve} = require('path')
@@ -56,9 +58,9 @@ export default class Generator {
       // case Types.database:
       //   await this.generateDatabase()
       // break;
-      // case Types.service:
-      //   await this.generateServices()
-      //   break;
+      case Types.service:
+        await this.generateServices()
+        break;
       // case Types.privilege:
       //   await this.generatePrivileges()
       //   break;
@@ -135,6 +137,7 @@ export default class Generator {
   //   }
   // }
 
+  // TODO: Move must of this into the datatypeTemplate function.
   async generateDatatypes() {
     try {
       const apiManager = new ServerManager(this.options)
@@ -142,7 +145,7 @@ export default class Generator {
       if(!apiManager.openapiDoc.components || !apiManager.openapiDoc.components.schemas)
         throw new Error(`/components/schemas not found in Open API Document`)
 
-      const schemaToClass = this.schemaToClassMap(apiManager.openapiDoc)
+      const schemaToClass = schemaToClassMap(apiManager.openapiDoc)
       let datatypesJS:any = {}
 
       // Generate classes for each schema:
@@ -247,95 +250,69 @@ export default class Generator {
     }
   }
 
-  // async generateServices() {
-  //   try {
-  //     const oasDoc = await new ApiManager().loadOpenApiJson()
-  //     if(!oasDoc.paths)
-  //       throw new Error(`/path not found in Open API Document`)
+  // TODO: Move must of this into the serviceTemplate function.
+  async generateServices() {
+    try {
+      const apiManager = new ServerManager(this.options)
+      await apiManager.loadOpenApiJson()
+      if(!apiManager.openapiDoc.paths)
+        throw new Error(`/path not found in Open API Document`)
 
-  //     let servicesJS: any = {}
+      let servicesJS: any = {}
 
-  //     const schemaToClass = this.schemaToClassMap(oasDoc)
+      // Generate classes for each service node:
+      Object.keys(apiManager.openapiDoc.paths)
+      .filter((path:string) => !/\{[^\}]+\}$/.test(path)) // only keep services
+      .filter((path: string) => path !== '/') // ignore root path
+      .forEach((path: string) => {
 
-  //     findParentPaths(oasDoc).forEach((parent: string) => {
-  //       if(parent !== '/rulebase') {
-  //         const paths = Object.keys(oasDoc.paths).filter((path: string) => path.startsWith(parent))
-  //         const templateData = {
-  //           name: parent.replace(/\//, ''),
-  //           methods: <any[]>[]
-  //         }
-  //         paths.forEach((path:string) => {
-  //           Object.keys(oasDoc.paths[path]).forEach((method:string) => {
-  //             const operationId = oasDoc.paths[path][method].operationId
-  //             if(operationId) {
-  //               templateData.methods.push({
-  //                 type: this.methodType(oasDoc, path, method, schemaToClass),
-  //                 operationId: toCammelCase(operationId, false)
-  //               })
-  //             }
-  //           })
-  //         })
-  //         servicesJS[templateData.name] = applyServiceClassTemplate(templateData)
-  //       }
-  //     })
+        // Get service and coresponding object node:
+        const paths = Object.keys(apiManager.openapiDoc.paths)
+        .filter((subPath: string) => (
+          subPath === path || subPath.match(new RegExp('^'+path+'\/\\{[^}]+\\}$'))
+        ))
 
-  //     Object.keys(servicesJS).forEach(async (name: string) => {
-  //       const className = toCammelCase(name + 'ServiceImpl')
-  //       const path = this.makePath(className, '.ts')
-  //       if(!path.match(`^(\/)?${GENSRC_DIR}`) && fs.existsSync(path)) {
-  //         logwarn(`${path} already exists: Skipping service ${code(className)}`)
-  //       }
-  //       else {
-  //         await fs.promises.writeFile(path, servicesJS[name])
-  //         logp(`Generated service class ${code(className)}`)
-  //       }
-  //     })
-  //   }
-  //   catch(err) {
-  //     logerror(`Failed to generate services: ${err}`, err)
-  //   }
-  // }
+        const templateData = {
+          serviceName: path.substring(path.lastIndexOf('/')+1), // service name 
+          methods: []
+        } as TemplateMap
 
-  private schemaToClassMap(oasDoc: any):{[key:string]:string} {
-    return Object.keys(oasDoc.components.schemas).reduce((map: {[key: string]: string}, schemaName: string) => {
-        // Remove non-words (e.g. hyphens):
-        const tokens = schemaName.match(/\w+/g);
-        if (!tokens)
-            throw new Error(`Invalid schema found '${schemaName}'`);
-        // Convert to camel-case:
-        map[`#/components/schemas/${schemaName}`] = tokens.reduce((className: string, t: string) => className + t.charAt(0).toUpperCase() + t.substring(1), '');
-        return map;
-    }, {});
+        // Find all methods for this service:
+        paths.forEach((path:string) => {
+          Object.keys(apiManager.openapiDoc.paths[path])
+          .filter((method:string) => ['get','post','put','delete','patch'].includes(method.toLowerCase()))
+          .forEach((method:string) => {
+            const operationId = apiManager.openapiDoc.paths[path][method].operationId
+            if(operationId) {
+              templateData.methods.push({
+                operationId: toCammelCase(operationId, false),
+                path,
+                method
+              })
+            }
+          })
+        })
+        servicesJS[templateData.serviceName] = serviceTemplate(apiManager.openapiDoc, templateData)
+      })
+
+      // Write files:
+      Object.keys(servicesJS).forEach(async (name: string) => {
+        const className = toCammelCase(name + 'Service')
+        
+        const path = this.makePath(className, '.ts')
+        if(!path.match(`^(\/)?${GENSRC_DIR}`) && fs.existsSync(path)) {
+          logwarn(`${path} already exists: Skipping service ${code(className)}`)
+        }
+        else {
+          await fs.promises.writeFile(path, servicesJS[name])
+          logp(`Generated service class ${code(className)}`)
+        }
+      })
+    }
+    catch(err) {
+      console.error(err)
+    }
   }
-
-  // private methodType(oasDoc: any, path: string, method: string, schemaToClass:{[key:string]:string}):string {
-  //   const schema = oasDoc.paths[path][method].responses['200'].content['application/json'].schema;
-
-  //   let allOf
-  //   if(Array.isArray(schema.allOf))
-  //     allOf = schema.allOf
-  //   else if(schema.type === 'array' && schema.items && schema.items.allOf)
-  //     allOf = schema.items.allOf
-
-  //   let type = ''
-  //   if(allOf) {
-  //     type = allOf
-  //       .map((childSchema:any) => schemaToClass[childSchema['$ref']])
-  //       .filter((type:string) => type !== 'VerboseObject') // by default this is handled by the service caller; see /gensrc/service
-  //       .join('&')
-  //   }
-  //   else if(schema.type === 'array' && schema.items && schema.items['$ref']) {
-  //     type = schemaToClass[schema['$ref']]
-  //   }
-  //   else if(schema['$ref']) {
-  //     type = schemaToClass[schema['$ref']]
-  //   }
-
-  //   if(type && schema.type === 'array')
-  //     return type + '[]'
-  //   else
-  //     return type
-  // }
 
   async generateServer() {
     await this.serviceManager.loadOpenApiJson()
@@ -374,7 +351,7 @@ export default class Generator {
     fs.writeFileSync(GENSRC_DIR+'/controllers/OptionsController.ts', OptionsControllerTemplate(this.serviceManager.openapiDoc))
     logp(`Created ${GENSRC_DIR}/controllers/OptionsController.ts`)
     
-    const controllers = serviceTemplate(this.serviceManager.openapiDoc)
+    const controllers = controllerTemplate(this.serviceManager.openapiDoc)
     Object.keys(controllers).forEach( (name: string) => {
       fs.writeFileSync(GENSRC_DIR+'/controllers/'+name, controllers[name])
       logp(`Created ${GENSRC_DIR}/controllers/${name}`)

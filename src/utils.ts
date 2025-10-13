@@ -42,7 +42,9 @@ export const jsonTypes: string[] = [
   "number",
   "boolean",
   "array",
-  "object"
+  "object",
+  "any",
+  "void"
 ]
 
 export const httpMethods: string[] = [
@@ -62,6 +64,8 @@ export const reservedTypes: string[] = [
   "oas3schema"
 ]
 reservedTypes.push(...jsonTypes)
+
+export const reservedClasses: string[] = reservedTypes.map( t => toCammelCase(t) )
 
 // export const importMap = {
 //   Service: 'blackbox-services',
@@ -86,3 +90,15 @@ export function extractPathParams(path: string): string[] {
   }
   return params
 }
+
+export function schemaToClassMap(oasDoc: any):{[key:string]:string} {
+    return Object.keys(oasDoc.components.schemas).reduce((map: {[key: string]: string}, schemaName: string) => {
+        // Remove non-words (e.g. hyphens):
+        const tokens = schemaName.match(/\w+/g);
+        if (!tokens)
+            throw new Error(`Invalid schema found '${schemaName}'`);
+        // Convert to camel-case:
+        map[`#/components/schemas/${schemaName}`] = tokens.reduce((className: string, t: string) => className + t.charAt(0).toUpperCase() + t.substring(1), '');
+        return map;
+    }, {});
+  }
