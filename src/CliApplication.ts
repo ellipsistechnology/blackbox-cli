@@ -8,7 +8,7 @@ import {logh1, logcode, logp, logerror, code, desc} from './logging.js'
 import ServerManager from './ServerManager.js'
 import DatatypeManager from './DatatypeManager.js'
 // import RepositoryManager from './RepositoryManager';
-// import Generator from './Generator'
+import Generator from './Generator.js'
 
 const keyValueFormat = (prefix:string, key:string, value:string) => prefix + code(key) + desc(value)
 
@@ -36,7 +36,9 @@ export default class CliApplication {
 	}
 
   async run() {
-    // TODO allow running from any subdirectory:
+    // TODO allow running from any subdirectory.
+    // TODO allow plugin commands (store in blackbox.json) - e.g. bb init rules.
+
     // No args defaults to help:
     if(this.args.length <= 0) {
       this.printHelp();
@@ -50,16 +52,18 @@ export default class CliApplication {
     case Commands.init:
       new Initialiser(this.options).init()
       break;
-    // case Commands.generate:
-    //   if(!this.args[1]) {
-    //     logerror("Error: Type was not provided for generate.")
-    //     return
-    //   }
-    //   if(!(<any>Object.keys(Types)).includes(this.args[1]))
-    //     throw new Error(`generate is not applicable to type '${this.args[1]}'`)
-    //   const type = Types[this.args[1] as keyof typeof Types]
-    //   await new Generator(this.options).generate(type)
-    //   break;
+    case Commands.generate:
+      if(!this.args[1] || this.args[1].startsWith("-")) {
+        logerror(`Please provide a type for ${commandString}.`)
+        return
+      }
+      if(!(<any>Object.keys(Types)).includes(this.args[1])) {
+        logerror(`Generate is not applicable to type '${this.args[1]}'`)
+        return
+      }
+      const type = Types[this.args[1] as keyof typeof Types]
+      await new Generator(this.options).generate(type)
+      break;
 
     case Commands.add:
     case Commands.update:

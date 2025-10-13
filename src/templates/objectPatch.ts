@@ -21,7 +21,9 @@ export default function (
             }
         },
         "responses": {
-            "200": {}
+            "200": {
+                "description": `${datatype} updated successfully.`,
+            }
         }
     }
 

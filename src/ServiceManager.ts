@@ -5,18 +5,9 @@ import {logerror, logp, code, logem} from './logging.js'
 import {printList} from './print-helper.js'
 import readlineSync from 'readline-sync'
 
-// import post_template from './templates/post-template.json'
-// import put_template from './templates/put-template.json'
-// import patch_template from './templates/patch-template.json'
-// import delete_template from './templates/delete-template.json'
-// import service_template from './templates/service-template.json' with { type: 'json' }
-// import RepositoryManager from './RepositoryManager';
-
-// import DatatypeManager from './DatatypeManager.js';
 import { toCammelCase } from './utils.js'
 import serviceGet from './templates/serviceGet.js'
 import servicePost from './templates/servicePost.js'
-// import { access } from 'fs'
 import objectGet from './templates/objectGet.js'
 import objectPut from './templates/objectPut.js'
 import objectPatch from './templates/objectPatch.js'
@@ -27,8 +18,7 @@ const methodToOperation:{ [key: string]: string } = {
   post: "create",
   put: "replace",
   patch: "update",
-  delete: "delete",
-  // options: "getOptionsFor"
+  delete: "delete"
 }
 
 export default class ServiceManager {
@@ -61,8 +51,6 @@ export default class ServiceManager {
 
     // Load and configure OpenAPI JSON:
     try {
-      console.log(this.config.path);
-      
       const parentPath = this.apiManager.blackboxToOpenapiPath(this.config.path || '/')
       if(!parentPath) {
         logerror(`Parent path ${parentPath} not found.`)
@@ -76,6 +64,7 @@ export default class ServiceManager {
       else {
         this.apiManager.openapiDoc.paths[path] = serviceGet({
           operationId: this.makeOperationId('get', this.config.access === 'unique' ? '' : 'List'),
+          serviceName: toCammelCase(this.config.name!, true) + (this.config.access === 'unique' ? '' : 'List'),
           datatype: this.config.datatype,
           access: this.config.access,
           identifier: this.config.identifier
@@ -88,7 +77,7 @@ export default class ServiceManager {
       const methods = this.config.methodsSet()
 
       // Add post method:
-      if(methods.includes('post')) { // FIXME: response type is missing in unique subservice
+      if(methods.includes('post')) {
         if(!this.addPostMethod(path)) {
           return // error already logged
         }
@@ -96,7 +85,7 @@ export default class ServiceManager {
 
       // If not unique then extend the path to the object node:
       if(this.config.access !== 'unique') {
-        const objectNodePathId = this.config.name + (this.config.identifier || 'id')
+        const objectNodePathId = this.config.name + (this.config.access === 'id' ? (this.config.identifier || 'id') : 'index')
         path = path+'/{'+objectNodePathId+'}'
 
         if(this.apiManager.openapiDoc.paths[path]) {
@@ -117,6 +106,7 @@ export default class ServiceManager {
 
         this.apiManager.openapiDoc.paths[path] = objectGet({
           operationId: this.makeOperationId('get'),
+          serviceName: toCammelCase(this.config.name!, true),
           datatype: this.config.datatype,
           pathParams: pathParams
         })
@@ -162,6 +152,7 @@ export default class ServiceManager {
     }
   }
 
+  // TODO: Allow changing of access.
   async update() {
     await this.apiManager.loadOpenApiJson()
 
@@ -292,37 +283,6 @@ export default class ServiceManager {
     logem(`Successfully updated service ${code(path)}.`)
   }
 
-  // private addPathForService() {
-	// 	// const path = this.config.servicePath();
-  //   const path = this.apiManager.blackboxToOpenapiPath(this.config.path || '/')
-	// 	if(path && this.apiManager.openapiDoc.paths[path]) {
-	// 		throw new Error("A service already exists at path "+path)
-	// 	}
-	// 	else {
-	// 		// let service = template(
-	// 		// 	service_template,
-	// 		// 	{
-  //     //     summary: this.config.summary || '',
-  //     //     tag: this.config.serviceTag(),
-  //     //     getOperationId: this.makeOperationId('get', 'Service'),
-  //     //     // optionsOperationId: this.makeOperationId('options', 'Service'),
-  //     //     parameters: [
-  //     //       { "$ref": "#/components/parameters/query-depth" },
-  //     //       { "$ref": "#/components/parameters/query-verbose" }
-  //     //     ]
-  //     //   }
-	// 		// );
-	// 		this.apiManager.openapiDoc.paths[path] = serviceGet({
-  //       operationId: this.makeOperationId('get', 'List'),
-  //       summary: this.config.summary || `Retrieve a list of ${this.config.datatype} objects.`,
-  //       description: this.config.description || '',
-  //       type: this.config.datatype || 'object'
-  //     })
-  //     logp(`Added path ${code(path)}`)
-	// 	}
-  //   return true
-	// }
-
   /**
    * Add a POST method to the given path.
    * Ensure this.config.datatype is valid before calling.
@@ -381,179 +341,6 @@ export default class ServiceManager {
       suffix
     )
   }
-
-  // private makeIdResponseSchemaName(bbPath: string):string {
-  //   if(!this.config.identifier) {
-  //     throw new Error("No identifier provided for ID response schema name.")
-  //   }
-
-  //   // Remove leading / and replace path separators with -:
-  //   return bbPath.substring(1).replaceAll('/#/', '-').replaceAll('/', '-') + `-${this.config.identifier}`
-  // }
-
-  // private addServiceMethod(
-  //   servicePath:string,
-  //   httpMethod:string,
-  //   openApiJson:any,
-	// 	methodTemplate:any,
-  //   templateMap:any) {
-
-  //   templateMap = Object.assign(
-  //     { operationId: this.makeOperationId(httpMethod) },
-  //     templateMap
-  //   )
-
-  //   let serviceElement = openApiJson.paths[servicePath]
-	// 	if(!serviceElement[httpMethod]) {
-	// 		let method = template(methodTemplate, templateMap)
-	// 		if(method) {
-  //       if(method.requestBody)
-  //         method.requestBody.content['application/json'].schema = this.schema()
-	// 			serviceElement[httpMethod] = method
-  //       logp(`Added ${code(httpMethod)} to path ${code(servicePath)}`)
-  //     }
-  //     else {
-  //       logerror(`Error loading template for method ${methodTemplate}`)
-  //     }
-	// 	}
-	// }
-
-  // private schema():any {
-	// 	if((<any>jsonTypes).includes(this.config.datatype))
-	// 		return { type: this.config.datatype }
-  //   else
-	// 		return { "$ref": `#/components/schemas/${this.config.datatype}` }
-	// }
-
-  // private httpGetResponseSchema():any {
-	// 	if(!(<any>jsonTypes).includes(this.config.datatype)) {
-	// 		return {
-  //       allOf: [
-  // 				this.schema(),
-  // 				{ "$ref": "#/components/schemas/verbose-object" }
-  // 			]
-  //     }
-	// 	}
-	// 	else {
-	// 		return this.schema()
-	// 	}
-	// }
-
-  // private addServiceGet(openApiJson:any) {
-  //   const path = this.config.path || '/'
-	// 	let getSchemaParent:any = this.apiManager.getSchemaParentByPath(path)
-	// 	getSchemaParent.schema = {
-	// 	  type: "array",
-	// 	  items: this.httpGetResponseSchema()
-	// 	}
-
-  //   if(this.config.summary)
-  //     openApiJson.paths[path].get.summary = this.config.summary
-  //   else if(!openApiJson.paths[path].get.summary)
-  //     openApiJson.paths[path].get.summary = `Retrieve a list of ${this.config.datatype} objects.`
-
-  //   openApiJson.paths[path].get.operationId = this.makeOperationId('get', 'List')
-
-  //   logp(`Set get schema for path ${code(path)}`)
-	// }
-
-  // private addServiceWithName(openApiJson:any, templateMap:any):any {
-  //   const serviceName = this.config.servicePath()+"/{name}"
-  //   let service = openApiJson.paths[serviceName]
-  //   let getOperationId = this.makeOperationId('get')
-  //   let optionsOperationId = this.makeOperationId('options')
-  //   if(!service) {
-	// 	  service = template(
-  //       service_template,
-  //       {
-  //         summary: "Gets a "+this.config.name+" by name.",
-  //         tag: this.config.serviceTag(),
-  //         getOperationId,
-  //         optionsOperationId
-  //       }
-  //     )
-
-  //     service.options.parameters = service.get.parameters = [
-  //       {
-  //         "$ref": "#/components/parameters/path-name"
-  //       },
-  //       {
-  //         "$ref": "#/components/parameters/query-verbose"
-  //       },
-  //       {
-  //         "$ref": "#/components/parameters/query-depth"
-  //       }
-  //     ]
-
-  //     openApiJson.paths[serviceName] = service
-  //     logp(`Addded service to path ${code(serviceName)}`)
-	// 	}
-  //   else {
-  //     service.operationId = getOperationId
-  //   }
-	// 	return service
-	// }
-
-  // private setupServiceWithNameGet(service:any) {
-  //   let tags = service.get.tags
-  //   if(!tags) {
-	//     tags = []
-  //     service.get.tags = tags
-  //   }
-  //   const tag = this.config.service ? this.config.service : this.config.name;
-  //   if(!(<any>tags).includes(tag))
-	// 	  tags.push(tag)
-
-	// 	service.get.responses[200].content["application/json"].schema = this.httpGetResponseSchema()
-	// }
-
-  // private async setServiceDatatype(openApiJson:any) {
-
-    // Check the datatype exists or load it from a repository:
-    // await this.addDatatypeToSchema(openApiJson, this.options.datatype)
-    // const repo = await new RepositoryManager(this.config).findRepositoryForDatatype(this.config.datatype)
-    // if(repo) {
-    //   new DatatypeManager(this.config).addDependantDatatypes(openApiJson, repo, this.config.datatype)
-
-    //   // Add to x-blackbox-types array:
-    //   const service = openApiJson.paths[this.config.servicePath()]
-    //   if(!service)
-    //     throw new Error(`Service not found at path ${this.config.servicePath()}`)
-    //   if(!service['x-blackbox-types'])
-    //     service['x-blackbox-types'] = []
-    //   service['x-blackbox-types'].push({
-    //     uri: repo.uri,
-    //     name: this.config.datatype
-    //   })
-    // }
-
-    // Add methods from templates:
-		// let templateData = {
-		// 	datatype: this.config.datatype,
-		// 	tag: this.config.serviceTag(),
-		// 	service: this.config.name
-		// }
-		// let methods = this.config.methodsSet()
-
-		// this.addServiceGet(openApiJson) // FIXME: generating incorrect operationId when getting here from add()
-
-		// if((<any>methods).includes("post"))
-		// 	this.addServiceMethod(this.config.servicePath(), "post", openApiJson, post_template, templateData)
-
-    // if((<any>methods).includes("put") || (<any>methods).includes("patch") || (<any>methods).includes("delete")) {
-
-    //   let serviceWithName = this.addServiceWithName(openApiJson, templateData)
-    //   this.setupServiceWithNameGet(serviceWithName);
-
-  	// 	let serviceWithNamePath = this.config.servicePath()+"/{name}"
-  	// 	if((<any>methods).includes("put"))
-  	// 		this.addServiceMethod(serviceWithNamePath, "put", openApiJson, put_template, templateData)
-  	// 	if((<any>methods).includes("patch"))
-  	// 		this.addServiceMethod(serviceWithNamePath, "patch", openApiJson, patch_template, templateData)
-  	// 	if((<any>methods).includes("delete"))
-  	// 		this.addServiceMethod(serviceWithNamePath, "delete", openApiJson, delete_template, templateData)
-    // }
-	// }
 
   async list() {
     try {

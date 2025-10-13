@@ -15,7 +15,7 @@ export default class CliConfig {
   file?:string
   path?:string
   // url:string = "";
-  // dest:string = "";
+  dest?:string
   // verbose:boolean = false;
   // singular:string = "";
   sourceData:string | undefined
@@ -72,6 +72,8 @@ export default class CliConfig {
         this.identifier = opts[opt]; break
       case 'all':
         this.all = opts[opt]; break
+      case 'dest':
+        this.dest = opts[opt]; break
       }
     })
 

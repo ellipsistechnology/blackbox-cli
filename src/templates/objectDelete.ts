@@ -11,7 +11,9 @@ export default function (
         "summary": `Delete a ${datatype}.`,
         "parameters": [] as any[],
         "responses": {
-            "200": {}
+            "200": {
+                "description": `${datatype} deleted successfully.`,
+            }
         }
     }
 

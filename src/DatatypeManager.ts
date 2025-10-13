@@ -1,6 +1,6 @@
 import CliConfig from './CliConfig.js'
 import ServerManager, {OPENAPI_FILENAME} from './ServerManager.js'
-import { jsonTypes } from './utils.js'
+import { jsonTypes, reservedTypes } from './utils.js'
 import {logerror, logq, q, logcode, logh1, logem, logp, code} from './logging.js'
 import readlineSync from 'readline-sync'
 import {printList} from './print-helper.js'
@@ -167,6 +167,15 @@ export default class DatatypeManager {
       }
       // No source file so add interactively or from remote repository:
       else if(this.config.name) {
+        // Validate name:
+        if(reservedTypes.includes(this.config.name)) {
+          logerror(`Datatype name ${code(this.config.name)} is reserved and cannot be used for user defined types.`)
+          return
+        }
+        if(this.config.name.match(/[^a-zA-Z0-9-_]/)) {
+          logerror(`Datatype name ${code(this.config.name)} contains invalid characters. Only alphanumeric characters, hyphens and underscores are allowed.`)
+          return
+        }
         // const repoWrapper = await new RepositoryManager(this.config).findRepositoryForDatatype(this.config.name)
         // if(repoWrapper) {
         //   this.putDatatype(this.config.name, repoWrapper.repo[this.config.name], false, repoWrapper)

@@ -45,9 +45,34 @@ export const jsonTypes: string[] = [
   "object"
 ]
 
+export const httpMethods: string[] = [
+  "get",
+  "put",
+  "post",
+  "delete",
+  "options",
+  "patch"
+]
+
+export const reservedTypes: string[] = [
+  "metadata",
+  "index-response",
+  "service",
+  "service-list",
+  "oas3schema"
+]
+reservedTypes.push(...jsonTypes)
+
+export const pathParamRegex = /\{([^}]+)\}/g
+
+/**
+ * Extract the path parameters from a path string.
+ * @param path The path string.
+ * @returns An array of parameter names.
+ */
 export function extractPathParams(path: string): string[] {
   const params = []
-  const regex = /\{([^}]+)\}/g
+  const regex = pathParamRegex
   let match
   while ((match = regex.exec(path)) !== null) {
     params.push(`${match[1]}`)

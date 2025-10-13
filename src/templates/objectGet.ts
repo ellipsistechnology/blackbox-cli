@@ -2,13 +2,15 @@ import path from "path"
 import { makeContentSchema } from "../utils.js"
 
 export default function(
-    {datatype, operationId, pathParams}:
+    {datatype, serviceName, operationId, pathParams}:
     {
         operationId: string,
+        serviceName: string,
         datatype: string,
         pathParams?: string[]
     }
 ) {
+  console.log(`creating option with id ${"getOptionsFor"+serviceName}`);
     const getDefinition =  {
       "get": {
         "summary": "Get a " + datatype + " object",
@@ -18,6 +20,7 @@ export default function(
         ],
         "responses": {
           "200": {
+            "description": "The requested " + datatype + " object.",
             "content": {
               "application/json": {
                 "schema": makeContentSchema(datatype)
@@ -27,7 +30,7 @@ export default function(
         }
       },
       "options": {
-        "operationId": "getOptions",
+        "operationId": "getOptionsFor"+serviceName,
         "responses": {
           "200": {
             "description": "List all available HTTP methods."

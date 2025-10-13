@@ -2,13 +2,16 @@ import { get } from 'http'
 import { jsonTypes, makeContentSchema } from '../utils.js'
 
 export default function (
-    {operationId, datatype, access, identifier}: {
+    {operationId, serviceName, datatype, access, identifier}: {
         operationId: string,
+        serviceName: string,
         datatype: string,
         access?: 'unique' | 'id' | 'index',
         identifier?: string
     }
 ) {
+  console.log(`creating option with id ${"getOptionsFor"+serviceName}`);
+  
     const getDefinition = {
       "get": {
         "operationId": operationId,
@@ -23,7 +26,7 @@ export default function (
         } as any
       },
       "options": {
-        "operationId": "getOptions",
+        "operationId": "getOptionsFor"+serviceName,
         "responses": {
           "200": {
             "description": "List all available HTTP methods."
