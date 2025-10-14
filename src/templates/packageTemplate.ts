@@ -26,7 +26,7 @@ export default function (
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "ellipsis-ioc": "file:../ellipsis-ioc",
+    "ellipsis-ioc": "file:../../../ellipsis-ioc",
     "express": "^5.1.0",
     "glob": "^11.0.3",
     "swagger-tools-oas3": "^1.3.1"

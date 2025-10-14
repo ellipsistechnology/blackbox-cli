@@ -1,10 +1,7 @@
 import fs from 'fs'
 import {code, logem, logerror} from './logging.js'
 import CliConfig from './CliConfig.js'
-
-export const OPENAPI_FILENAME: string = "openapi.json"
-export const CONFIG_FILENAME: string = "blackbox.json"
-export const PACKAGE_FILENAME: string = "package.json"
+import {CONFIG_FILENAME, OPENAPI_FILENAME, PACKAGE_FILENAME} from './utils.js'
 
 export default class ServerManager {
   openapiDoc: any

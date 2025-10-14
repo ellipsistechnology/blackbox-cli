@@ -55,6 +55,7 @@ async function init() {
 
     // Start the HTTP server:
     http.createServer(app).listen(serverPort, () => {
+        console.log('Server started at '+new Date().toISOString())
         console.log('Server is listening on port '+serverPort)
         console.log('Swagger UI is available at http://localhost:'+serverPort+'/docs')
     });

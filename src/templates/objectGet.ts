@@ -10,7 +10,6 @@ export default function(
         pathParams?: string[]
     }
 ) {
-  console.log(`creating option with id ${"getOptionsFor"+serviceName}`);
     const getDefinition =  {
       "get": {
         "summary": "Get a " + datatype + " object",

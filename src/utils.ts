@@ -1,3 +1,6 @@
+import http from "node:http"
+import https from "node:https"
+
 /**
  * Convert a string to CamelCase.
  * @param name The string to convert.
@@ -35,6 +38,10 @@ export function makeContentSchema(datatype:string) {
   { "type": datatype } :
   { "$ref": "#/components/schemas/"+datatype }
 }
+
+export const OPENAPI_FILENAME: string = "openapi.json"
+export const CONFIG_FILENAME: string = "blackbox.json"
+export const PACKAGE_FILENAME: string = "package.json"
 
 export const jsonTypes: string[] = [
   "string",
@@ -92,13 +99,38 @@ export function extractPathParams(path: string): string[] {
 }
 
 export function schemaToClassMap(oasDoc: any):{[key:string]:string} {
-    return Object.keys(oasDoc.components.schemas).reduce((map: {[key: string]: string}, schemaName: string) => {
-        // Remove non-words (e.g. hyphens):
-        const tokens = schemaName.match(/\w+/g);
-        if (!tokens)
-            throw new Error(`Invalid schema found '${schemaName}'`);
-        // Convert to camel-case:
-        map[`#/components/schemas/${schemaName}`] = tokens.reduce((className: string, t: string) => className + t.charAt(0).toUpperCase() + t.substring(1), '');
-        return map;
-    }, {});
-  }
+  return Object.keys(oasDoc.components.schemas).reduce((map: {[key: string]: string}, schemaName: string) => {
+      // Remove non-words (e.g. hyphens):
+      const tokens = schemaName.match(/\w+/g);
+      if (!tokens)
+          throw new Error(`Invalid schema found '${schemaName}'`);
+      // Convert to camel-case:
+      map[`#/components/schemas/${schemaName}`] = tokens.reduce((className: string, t: string) => className + t.charAt(0).toUpperCase() + t.substring(1), '');
+      return map;
+  }, {});
+}
+
+export function get(url: string): Promise<{status?: number, statusText?: string, headers?: any, data?: any}> {
+  return new Promise((resolve, reject) => {
+    (url.startsWith('https') ? https : http).get(url, (res) => {
+      let data = ''
+
+      res.on('data', (chunk) => {
+        data += chunk
+      })
+
+      res.on('end', () => {
+        resolve({
+          status: res.statusCode,
+          statusText: res.statusMessage,
+          headers: res.headers,
+          data: JSON.parse(data)
+        })
+      })
+
+      res.on('error', (err) => {
+        reject(err)
+      })
+    })
+  })
+}

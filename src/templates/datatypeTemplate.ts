@@ -1,17 +1,18 @@
 import { toCammelCase, jsonTypes } from "../utils.js"
 
-interface TemplateMap {
+export interface TemplateMap {
   name:string
   parentClasses?:string[]
   properties:{
     type:string
     name:string
   }[]
+  additionalProperties?: string
   values?:string[]
   required:string[]
 }
 
-export default function applyDatetypeClassTemplate({name, properties, parentClasses, values, required}:TemplateMap): string {
+export default function ({name, properties, additionalProperties, parentClasses, values, required}:TemplateMap): string {
 
   const className = toCammelCase(name)
 
@@ -30,12 +31,13 @@ export default function applyDatetypeClassTemplate({name, properties, parentClas
 
   // /${pattern}/.test(this.toString())
 
-  if(parentClasses)
+  if(parentClasses) {
     parentClasses.filter((className:string) => !(<any>jsonTypes).includes(className.toLowerCase())).forEach((className:string) => imports += `import {${className}} from './${className}'\n`)
+  }
 
   return `${imports?imports+'\n':''}${!values?'export default ':''}${classOrInterfaceOrEnum} ${className}${parentClasses ? ' extends '+parentClasses.join(', '):''} {
-  ${properties.map( property => `${toCammelCase(property.name, false)}${(<any>required).includes(property.name)?'':'?'}: ${toCammelCase(property.type)}`).join('\n  ')
-  }${values?values.join(',\n  '):''}
+  ${properties.map( property => `${toCammelCase(property.name, false)}${required.includes(property.name)?'':'?'}: ${toCammelCase(property.type)}`).join('\n  ')
+  }${values?values.join(',\n  '):''}${additionalProperties || ''}
 }
 ${values?`export default ${className}`:''}
 `

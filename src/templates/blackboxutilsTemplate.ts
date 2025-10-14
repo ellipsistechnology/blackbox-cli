@@ -112,7 +112,7 @@ export function makeService(req: any, openapiDoc: any): Service | Metadata {
     const schema = req.openapi.schema.responses['200'].content['application/json'].schema;
 
     return {
-        name: req.openapi.openApiRoute.replaceAll('/', ''),
+        name: req.openapi.openApiRoute.substring(req.openapi.openApiRoute.lastIndexOf('/')+1).replaceAll('/', ''),
         description: req.openapi.schema.description,
         href: req.openapi.openApiRoute,
         type: {
@@ -124,7 +124,8 @@ export function makeService(req: any, openapiDoc: any): Service | Metadata {
     };
 }
 
-export function makeServiceList(root: string, openapiDoc: any): ServiceList & Metadata {
+export function makeServiceList(req: any, openapiDoc: any): ServiceList & Metadata {
+    const root = req.openapi.openApiRoute
     return {
         services: Object.keys(openapiDoc.paths)
             .filter(path => path.startsWith(root) && !path.slice(root.length+1).includes('/') && path !== root)
@@ -133,6 +134,13 @@ export function makeServiceList(root: string, openapiDoc: any): ServiceList & Me
                 href: path
             }))
     };
+}
+
+export function makeUniqueService(req: any, openapiDoc: any): ServiceList & (Service | Metadata) {
+    return {
+        ...makeService(req, openapiDoc),
+        ...makeServiceList(req, openapiDoc)
+    }
 }
 `
 }

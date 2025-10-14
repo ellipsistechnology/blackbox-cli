@@ -2,16 +2,15 @@ import { get } from 'http'
 import { jsonTypes, makeContentSchema } from '../utils.js'
 
 export default function (
-    {operationId, serviceName, datatype, access, identifier}: {
+    {operationId, serviceName, datatype, access, identifier, pathParams}: {
         operationId: string,
         serviceName: string,
         datatype: string,
         access?: 'unique' | 'id' | 'index',
-        identifier?: string
+        identifier?: string,
+        pathParams?: string[]
     }
 ) {
-  console.log(`creating option with id ${"getOptionsFor"+serviceName}`);
-  
     const getDefinition = {
       "get": {
         "operationId": operationId,
@@ -34,6 +33,13 @@ export default function (
         }
       },
       "x-bb-service": { access, identifier},
+    }
+
+    // Add id/index parameter if needed:
+    if(pathParams) {
+        pathParams.forEach(p => {
+            getDefinition.get.parameters?.push({"$ref": "#/components/parameters/path-"+p})
+        })
     }
 
     // Add response schema:

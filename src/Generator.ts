@@ -2,7 +2,7 @@ import CliOptions from "./CliConfig.js"
 import Types from "./Types.js"
 
 import fs from 'fs'
-import { logerror, code, logp, logwarn } from "./logging.js"
+import { logerror, code, logp, logwarn, logem } from "./logging.js"
 import ApiManager from "./ServerManager.js"
 // import applyServiceClassTemplate from "./applyServiceClassTemplate"
 
@@ -22,7 +22,8 @@ import datatypeTemplate from "./templates/datatypeTemplate.js"
 
 import { toCammelCase, jsonTypes, reservedTypes, schemaToClassMap } from "./utils.js"
 import ServerManager from "./ServerManager.js"
-import { TemplateMap } from "./templates/serviceTemplate.js"
+import { TemplateMap as ServiceTemplateMap } from "./templates/serviceTemplate.js"
+import { TemplateMap as DatatypeTemplateMap } from "./templates/datatypeTemplate.js"
 import controllerTemplate from "./templates/controllerTemplate.js"
 
 // const {exec} = require('child_process')
@@ -137,7 +138,7 @@ export default class Generator {
   //   }
   // }
 
-  // TODO: Move must of this into the datatypeTemplate function.
+  // TODO: Move most of this into the datatypeTemplate function.
   async generateDatatypes() {
     try {
       const apiManager = new ServerManager(this.options)
@@ -151,10 +152,13 @@ export default class Generator {
       // Generate classes for each schema:
       Object.keys(apiManager.openapiDoc.components.schemas).forEach( (name:string) => {
         const schema = apiManager.openapiDoc.components.schemas[name]
-        if(schema.type === 'object' && schema.properties) {
+        if(schema.type === 'object') {
           const templateData = {
-            name,
-            properties: Object.keys(schema.properties).map((name:string) => ({
+            name
+          } as DatatypeTemplateMap
+          
+          if(schema.properties) {
+            templateData.properties = Object.keys(schema.properties).map((name:string) => ({
               name,
               type: (
                 schema.properties[name]['$ref'] ? schemaToClass[schema.properties[name]['$ref']] :
@@ -173,10 +177,23 @@ export default class Generator {
                 ) :
                 'any'
               )
-            }) ),
-            required: Array.isArray(schema.required) ? schema.required : []
+            }) )
+          } else {
+            templateData.properties = []
           }
+
+          if(schema.additionalProperties) {
+            templateData.additionalProperties = '[key: string]: '+(
+              schema.additionalProperties['$ref'] ? schemaToClass[schema.additionalProperties['$ref']] :
+              (<any>jsonTypes).includes(schema.additionalProperties.type) ? schema.additionalProperties.type :
+              'any'
+            )
+          }
+
+          templateData.required = Array.isArray(schema.required) ? schema.required : []
+
 // TODO all special cases above need to be below and vise-versa; i.e. extract to methods
+          
           datatypesJS[templateData.name] = datatypeTemplate(templateData)
         }
         else if(schema.type === 'string' && (schema.pattern || schema.format)) {
@@ -223,7 +240,7 @@ export default class Generator {
       })
 
       // Write files:
-      Object.keys(datatypesJS).forEach(async (name:string) => {
+      Object.keys(datatypesJS).forEach((name:string) => {
         const className = toCammelCase(name.charAt(0).toUpperCase() + name.substring(1))
         const src = reservedTypes.includes(name) ? GENSRC_DIR : SRC_DIR
         const path = this.makePath(className, '.ts', src)
@@ -241,16 +258,18 @@ export default class Generator {
         }
 
         // Write the file:
-        await fs.promises.writeFile(path, datatypesJS[name])
+        fs.writeFileSync(path, datatypesJS[name])
         logp(`Generated datatype ${code(className)}`)
       })
+
+      logem(`Datatype generation complete.`)
     }
     catch(err) {
       logerror(`Failed to generate datatypes: ${err}`, err)
     }
   }
 
-  // TODO: Move must of this into the serviceTemplate function.
+  // TODO: Move most of this into the serviceTemplate function.
   async generateServices() {
     try {
       const apiManager = new ServerManager(this.options)
@@ -264,6 +283,7 @@ export default class Generator {
       Object.keys(apiManager.openapiDoc.paths)
       .filter((path:string) => !/\{[^\}]+\}$/.test(path)) // only keep services
       .filter((path: string) => path !== '/') // ignore root path
+      .filter((path: string) => !this.options.path || path === this.options.path) // select the specified path if given
       .forEach((path: string) => {
 
         // Get service and coresponding object node:
@@ -275,7 +295,7 @@ export default class Generator {
         const templateData = {
           serviceName: path.substring(path.lastIndexOf('/')+1), // service name 
           methods: []
-        } as TemplateMap
+        } as ServiceTemplateMap
 
         // Find all methods for this service:
         paths.forEach((path:string) => {
@@ -296,7 +316,7 @@ export default class Generator {
       })
 
       // Write files:
-      Object.keys(servicesJS).forEach(async (name: string) => {
+      Object.keys(servicesJS).forEach((name: string) => {
         const className = toCammelCase(name + 'Service')
         
         const path = this.makePath(className, '.ts')
@@ -304,10 +324,12 @@ export default class Generator {
           logwarn(`${path} already exists: Skipping service ${code(className)}`)
         }
         else {
-          await fs.promises.writeFile(path, servicesJS[name])
+          fs.writeFileSync(path, servicesJS[name])
           logp(`Generated service class ${code(className)}`)
         }
       })
+
+      logem(`Service generation complete.`)
     }
     catch(err) {
       console.error(err)
@@ -356,5 +378,10 @@ export default class Generator {
       fs.writeFileSync(GENSRC_DIR+'/controllers/'+name, controllers[name])
       logp(`Created ${GENSRC_DIR}/controllers/${name}`)
     })
+
+    logem(`Server generation complete.`)
+    logem(`Run ${code('npm install')} to install dependencies.`)
+    logem(`Run ${code('npm run dev')} to start the development server.`)
+    logem(`Run ${code('npm run build')} to build for deployment.`)
   }
 }

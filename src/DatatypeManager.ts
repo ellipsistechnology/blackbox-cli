@@ -1,10 +1,10 @@
 import CliConfig from './CliConfig.js'
-import ServerManager, {OPENAPI_FILENAME} from './ServerManager.js'
-import { jsonTypes, reservedTypes } from './utils.js'
-import {logerror, logq, q, logcode, logh1, logem, logp, code} from './logging.js'
+import ServerManager from './ServerManager.js'
+import { jsonTypes, OPENAPI_FILENAME, reservedTypes } from './utils.js'
+import {logerror, q, logh1, logem, code, logp} from './logging.js'
 import readlineSync from 'readline-sync'
 import {printList} from './print-helper.js'
-// import RepositoryManager, { RepoWrapper } from './RepositoryManager';
+import RepositoryManager, { RepoWrapper } from './RepositoryManager.js';
 
 // TODO allow add from repository
 
@@ -38,79 +38,79 @@ export default class DatatypeManager {
     return src.filter((entry:any) => entry["$ref"] !== undefined)
   }
 
-  // addDependantDatatypes(openApiJson:any, repoWrapper: RepoWrapper, name:string) {
+  addDependantDatatypes(openApiJson:any, repoWrapper: RepoWrapper, name:string) {
 
-  //   const add = (name:string) => {
-  //     const copy = this.deepCopy(repoWrapper.repo[name])
-  //     let toAdd:string[] = []
-  //     let refNodes:any[] = []
+    const add = (name:string) => {
+      const copy = this.deepCopy(repoWrapper.repo[name])
+      let toAdd:string[] = []
+      let refNodes:any[] = []
 
-  //     // Find any $refs in oneOf, anyOf, allOf:
-  //     if(Array.isArray(copy.oneOf)) {
-  //       refNodes = this.allRefs(<string[]>copy.oneOf)
-  //     }
-  //     else if(Array.isArray(copy.allOf)) {
-  //       refNodes = this.allRefs(<string[]>copy.allOf)
-  //     }
-  //     else if(Array.isArray(copy.anyOf)) {
-  //       refNodes = this.allRefs(<string[]>copy.anyOf)
-  //     }
-  //     else if(copy.properties) {
+      // Find any $refs in oneOf, anyOf, allOf:
+      if(Array.isArray(copy.oneOf)) {
+        refNodes = this.allRefs(<string[]>copy.oneOf)
+      }
+      else if(Array.isArray(copy.allOf)) {
+        refNodes = this.allRefs(<string[]>copy.allOf)
+      }
+      else if(Array.isArray(copy.anyOf)) {
+        refNodes = this.allRefs(<string[]>copy.anyOf)
+      }
+      else if(copy.properties) {
 
-  //       // Find children that are also references within the repository:
-  //       Object.keys(copy.properties).forEach((key:string) => {
+        // Find children that are also references within the repository:
+        Object.keys(copy.properties).forEach((key:string) => {
 
-  //         // Property is a $ref:
-  //         if(copy.properties[key]["$ref"]) {
-  //           refNodes.push(copy.properties[key])
-  //         }
+          // Property is a $ref:
+          if(copy.properties[key]["$ref"]) {
+            refNodes.push(copy.properties[key])
+          }
 
-  //         // Property is an array with items that are $ref:
-  //         else if(copy.properties[key].type
-  //           && copy.properties[key].type === "array"
-  //           && copy.properties[key].items
-  //           && copy.properties[key].items["$ref"]) {
-  //             refNodes.push(copy.properties[key].items)
-  //         }
+          // Property is an array with items that are $ref:
+          else if(copy.properties[key].type
+            && copy.properties[key].type === "array"
+            && copy.properties[key].items
+            && copy.properties[key].items["$ref"]) {
+              refNodes.push(copy.properties[key].items)
+          }
 
-  //         // Property includes $refs in oneOf, anyOf, allOf:
-  //         else if(Array.isArray(copy.properties[key].oneOf)) {
-  //           refNodes = refNodes.concat(this.allRefs(<string[]>copy.properties[key].oneOf))
-  //         }
-  //         else if(Array.isArray(copy.properties[key].anyOf)) {
-  //           refNodes = refNodes.concat(this.allRefs(<string[]>copy.properties[key].anyOf))
-  //         }
-  //         else if(Array.isArray(copy.properties[key].allOf)) {
-  //           refNodes = refNodes.concat(this.allRefs(<string[]>copy.properties[key].allOf))
-  //         }
+          // Property includes $refs in oneOf, anyOf, allOf:
+          else if(Array.isArray(copy.properties[key].oneOf)) {
+            refNodes = refNodes.concat(this.allRefs(<string[]>copy.properties[key].oneOf))
+          }
+          else if(Array.isArray(copy.properties[key].anyOf)) {
+            refNodes = refNodes.concat(this.allRefs(<string[]>copy.properties[key].anyOf))
+          }
+          else if(Array.isArray(copy.properties[key].allOf)) {
+            refNodes = refNodes.concat(this.allRefs(<string[]>copy.properties[key].allOf))
+          }
 
-  //       })
-  //     }
+        })
+      }
 
-  //     // Update $ref:
+      // Update $ref:
 
-  //     refNodes.forEach((n) => {
-  //       const value:string = n["$ref"]
-  //       let newRef = /(?<=^#\/)[^\/]+$/.exec(value) // Strip out #/
-  //       if(newRef) {
-  //         n["$ref"] = `#/components/schemas/${newRef[0]}`
-  //         toAdd.push(newRef[0])
-  //       }
-  //       else {
-  //         throw new Error(`Failed to parse path ${value} in repository: Note that all $refs must start with #/ and be relative to the root of the repository.`)
-  //       }
-  //     })
+      refNodes.forEach((n) => {
+        const value:string = n["$ref"]
+        let newRef = /(?<=^#\/)[^\/]+$/.exec(value) // Strip out #/
+        if(newRef) {
+          n["$ref"] = `#/components/schemas/${newRef[0]}`
+          toAdd.push(newRef[0])
+        }
+        else {
+          throw new Error(`Failed to parse path ${value} in repository: Note that all $refs must start with #/ and be relative to the root of the repository.`)
+        }
+      })
 
-  //     // Recurse on children:
-  //     toAdd.forEach(add)
+      // Recurse on children:
+      toAdd.forEach(add)
 
-  //     // Add the datatype to openapi.json:
-  //     openApiJson.components.schemas[name] = copy
-  //     logp(`Added datatype ${code(name)} to ${code(OPENAPI_FILENAME)} from repository.`)
+      // Add the datatype to openapi.json:
+      openApiJson.components.schemas[name] = copy
+      logp(`Added datatype ${code(name)} to ${code(OPENAPI_FILENAME)} from repository.`)
 
-  //   }
-  //   add(name)
-  // }
+    }
+    add(name)
+  }
 
   private mapRefs(datatype: any) {
     if(datatype.properties) {
@@ -124,8 +124,8 @@ export default class DatatypeManager {
     }
   }
 
-  private putDatatype(name:string, datatype:any=undefined, allowReplace=false){//}, repoWrapper:RepoWrapper|undefined=undefined) {
-    let schemas = this.apiManager.getSchemas();
+  private putDatatype(name:string, datatype:any=undefined, allowReplace=false, repoWrapper:RepoWrapper|undefined=undefined) {
+    let schemas = this.apiManager.getSchemas()
     if(!allowReplace && schemas[name]) {
       logerror(`Datatype with name ${name} already exists; Datatype not added.`)
       return
@@ -136,16 +136,16 @@ export default class DatatypeManager {
   		this.updateByPrompt(schemas, datatype)
     }
 
-    // if(repoWrapper) {
-    //   this.addDependantDatatypes(repoWrapper, name)
-    // } else {
+    if(repoWrapper) {
+      this.addDependantDatatypes(this.apiManager.openapiDoc, repoWrapper, name)
+    } else {
       this.mapRefs(datatype)
       schemas[name] = datatype
-    // }
+    }
 
 
     this.apiManager.writeApiJson()
-    logem(`Successfully ${allowReplace?'updated':'added'} datatype ${name}`)
+    logem(`Successfully ${allowReplace?'updated':'added'} datatype ${code(name)}`)
   }
 
   async add() {
@@ -176,14 +176,17 @@ export default class DatatypeManager {
           logerror(`Datatype name ${code(this.config.name)} contains invalid characters. Only alphanumeric characters, hyphens and underscores are allowed.`)
           return
         }
-        // const repoWrapper = await new RepositoryManager(this.config).findRepositoryForDatatype(this.config.name)
-        // if(repoWrapper) {
-        //   this.putDatatype(this.config.name, repoWrapper.repo[this.config.name], false, repoWrapper)
-        //   logp(`Adding datatype ${code(this.config.name)} from repository ${code(repoWrapper.uri)}`)
-        // }
-        // else {
+
+        // Try to get type from repository:
+        const repoWrapper = await new RepositoryManager(this.config).findRepositoryForDatatype(this.config.name)
+        if(repoWrapper) {
+          logp(`Adding datatype ${code(this.config.name)} from repository ${code(repoWrapper.uri)}`)
+          this.putDatatype(this.config.name, repoWrapper.repo[this.config.name], false, repoWrapper)
+        }
+        // Otherwise add interactively:
+        else {
           this.putDatatype(this.config.name)
-        // }
+        }
       }
       else {
         logerror("Name not found. Use -n or --name to supply a name for the datatype you wish to add, or use --file to provide a schema source file.")
@@ -267,15 +270,15 @@ export default class DatatypeManager {
         Object.assign(datatype, source[this.config.name])
       }
       else {
-        // const repoWrapper = await new RepositoryManager(this.config).findRepositoryForDatatype(this.config.name)
-        // if(repoWrapper) {
-        //   this.putDatatype(openApiDoc, this.config.name, repoWrapper.repo[this.config.name], true, repoWrapper)
-        //   logp(`Updating datatype ${code(this.config.name)} from repository ${code(repoWrapper.uri)}`)
-        // }
-        // else {
+        const repoWrapper = await new RepositoryManager(this.config).findRepositoryForDatatype(this.config.name)
+        if(repoWrapper) {
+          this.putDatatype(this.config.name, repoWrapper.repo[this.config.name], true, repoWrapper)
+          logp(`Updating datatype ${code(this.config.name)} from repository ${code(repoWrapper.uri)}`)
+        }
+        else {
           this.updateByPrompt(schemas, datatype)
           logem(`Successfully updated datatype ${code(this.config.name)}.`)
-        // }
+        }
       }
 
       this.apiManager.writeApiJson();

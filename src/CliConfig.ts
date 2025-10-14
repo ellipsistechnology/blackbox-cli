@@ -7,17 +7,14 @@ export default class CliConfig {
   name?:string
   title?:string
   description?:string
-  // service?:string
   datatype?:string
   methods:string = "get,post,put,patch,delete"
   all:boolean = false
   summary?:string
   file?:string
   path?:string
-  // url:string = "";
+  url?:string
   dest?:string
-  // verbose:boolean = false;
-  // singular:string = "";
   sourceData:string | undefined
   access?: 'unique' | 'id' | 'index' = 'id'
   identifier?: string
@@ -30,9 +27,7 @@ export default class CliConfig {
     	.option('-n, --name <name>', "The name of the entity being added or modified.")
     	.option('-t, --title <title>', "The title of the API.")
     	.option('--desc <description>', 'The description of the API.')
-      // .option('-s, --service <service>', "The parent service in the case of sub-services. Defaults to no parent; i.e. a root level service.")
       .option('-p, --path <path>', "The path to the parent node in the case of sub-services. Use # as value placeholders. Defaults to the root node.")
-      // .option('--singular <singular>', "The singular form of the service name when using plural service paths. Used for the operationId.")
       .option('--access <access>', "The access type for the service. One of 'unique', 'id' or 'index'.")
       .option('-i, --identifier <identifier>', "The identifier field for the service. E.g. 'id' or 'name'. Required if access is 'id' or 'index'.")
       .option('-d, --datatype <datatype>', "The data type of a service.")
@@ -74,6 +69,8 @@ export default class CliConfig {
         this.all = opts[opt]; break
       case 'dest':
         this.dest = opts[opt]; break
+      case 'url':
+        this.url = opts[opt]; break
       }
     })
 

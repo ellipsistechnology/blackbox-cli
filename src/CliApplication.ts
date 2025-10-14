@@ -3,11 +3,10 @@ import Types, {printTypes} from './Types.js'
 import CliConfig from './CliConfig.js'
 import Initialiser from './Initialiser.js'
 import ServiceManager from './ServiceManager.js'
-// import DatatypeManager from './DatatypeManager'
 import {logh1, logcode, logp, logerror, code, desc} from './logging.js'
 import ServerManager from './ServerManager.js'
 import DatatypeManager from './DatatypeManager.js'
-// import RepositoryManager from './RepositoryManager';
+import RepositoryManager from './RepositoryManager.js';
 import Generator from './Generator.js'
 
 const keyValueFormat = (prefix:string, key:string, value:string) => prefix + code(key) + desc(value)
@@ -37,7 +36,7 @@ export default class CliApplication {
 
   async run() {
     // TODO allow running from any subdirectory.
-    // TODO allow plugin commands (store in blackbox.json) - e.g. bb init rules.
+    // TODO allow plugin commands (store in blackbox.json) - e.g. bb init rules; bb add database; bb add authentication
 
     // No args defaults to help:
     if(this.args.length <= 0) {
@@ -47,6 +46,8 @@ export default class CliApplication {
 
     let commandString = this.args[0]
     let command = Commands[commandString as keyof typeof Commands]
+
+// console.log(`Executing ${commandString} ${this.args[1]}`);
     
     switch(command) {
     case Commands.init:
@@ -115,8 +116,8 @@ export default class CliApplication {
 			return new ServiceManager(this.options)
 		case Types.datatype:
 			return new DatatypeManager(this.options)
-    // case Types.repository:
-    //   return new RepositoryManager(this.options)
+    case Types.repository:
+      return new RepositoryManager(this.options)
 		default:
 			logerror("Unknown type "+type+".")
       return null

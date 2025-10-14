@@ -28,7 +28,7 @@ export default function (
             // so the last node will always be the service name.
             serviceNames[fileName] = path.substring(path.lastIndexOf('/')+1)
             controllerList[fileName] = `import { autowired, autowiredService } from "ellipsis-ioc";
-import { makeService, makeServiceList } from "../blackbox-utils.js";
+import { makeService, makeServiceList, makeUniqueService } from "../blackbox-utils.js";
 
 class ServiceWrapper {
     @autowiredService('${serviceNames[fileName]}')
@@ -58,13 +58,13 @@ const wrapper = new ServiceWrapper()
                 throw new Error(`No operationId found for ${method.toUpperCase()} for service ${path}.`)
             }
 
-            const functionCheck = `if(typeof wrapper.service.getHello !== 'function') {
-        console.error("Service function ${operationId} not found: "+
-            "Please implement function ${operationId} in a service class tagged with the @service('${serviceNames[fileName]}') decorator."
-        )
-        res.status(500).json({"error": "Service function getHello not found."})
-        return
-    }
+            const functionCheck = `if(typeof wrapper.service.${operationId} !== 'function') {
+            console.error("Service function ${operationId} not found: "+
+                "Please implement function ${operationId} in a service class tagged with the @service('${serviceNames[fileName]}') decorator."
+            )
+            res.status(500).json({"error": "Service function ${operationId} not found."})
+            return
+        }
 `
 
             // Get for a service node (unique object or list of objects with identifier/index)
@@ -72,6 +72,7 @@ const wrapper = new ServiceWrapper()
             if(method === 'get') {
                 const isUnique = bbConfig?.access === 'unique'
                 const isObject = path.endsWith('}') || path.endsWith('}/') // ends with a path param
+                const hasSubpaths = Object.keys(openapiDoc.paths).some( p => p !== path && p.startsWith(path.endsWith('/') ? path : path + '/') )
                 controllerList[fileName] += `// Get the ${isUnique ? 'unique' : !isObject ? 'list of' : ''} object${isUnique || isObject ? '' : 's'} for '${path}':
 export function ${operationId}(req: any, res: any) {
     const meta = req.query.meta
@@ -82,8 +83,9 @@ export function ${operationId}(req: any, res: any) {
           const metadata = wrapper.service.${operationId}Meta( {${pathParamsList}} )
           res.status(200).json(metadata)
         } else {
-            ${bbConfig ? `res.status(200).json(makeService${!isUnique ? 'List' : ''}(req, wrapper.openapiDoc))` 
-                       : `res.status(404).json({"error": "Metadata is not available for this ${isObject ? 'object' : 'service'}."})`
+            ${   isUnique ? `res.status(200).json(makeUniqueService(req, wrapper.openapiDoc))` :
+              hasSubpaths ? `res.status(200).json(makeService${isObject ? 'List' : ''}(req, wrapper.openapiDoc))` :
+                            `res.status(404).json({"error": "Metadata is not available for this ${isObject ? 'object' : 'service'}."})`
             }
         }
     } else {
