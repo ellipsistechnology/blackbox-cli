@@ -21,7 +21,7 @@ export default class CliApplication {
     this.options = new CliConfig(args.slice(1)) // FIXME: dev only; remove node command; fix for command line execution
   }
 
-  printHelp() {
+  async printHelp() {
 		logh1("Usage:")
 		logcode("\tbb command [type] [options]")
 
@@ -30,6 +30,11 @@ export default class CliApplication {
 
 		logh1("\nTypes:")
 		logp(printTypes("\t", keyValueFormat))
+    const extManager = new ExtensionManager(this.options)
+    const extensionTypes = await extManager.printExtensionTypes("\t", keyValueFormat)
+    if(extensionTypes) {
+      logp(extensionTypes)
+    }
 
 		logh1("\nOptions:")
 		logp(this.options.describeOptions("\t", keyValueFormat))
@@ -98,7 +103,8 @@ export default class CliApplication {
       try {
         (<any>manager)[command]() // call the relevant command on the manager
       } catch(err) {
-        logerror(`Failed to ${command} ${type}:`, err)
+        logerror(`Failed to ${command} ${type}`)
+        console.error(err)
       }
 		}
 	}

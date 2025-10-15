@@ -1,6 +1,6 @@
 import {logcode} from './logging.js'
 
-const defaultFormat = (prefix:string, key:string, value:string) => `${prefix}${key} ${value}`
+const defaultKeyValueFormat = (prefix:string, key:string, value:string) => `${prefix}${key} ${value}`
 
 const fixWidth = (str:string, length:number):string => {
   const padding = length - str.length + 2
@@ -16,9 +16,19 @@ const maxLength = (strs:string[]) => (
 const printEnum = (Enum:any) => {
   const colWidth = maxLength(Object.keys(Enum))
 
-  return (prefix:string, format = defaultFormat) => (
+  return (prefix:string, format = defaultKeyValueFormat) => (
     Object.keys(Enum)
       .map( (key:string) => format(prefix, fixWidth(key, colWidth), Enum[key as keyof typeof Enum]) )
+      .reduce( (accumulator, currentValue) => accumulator + currentValue + '\n', '' )
+  )
+}
+
+const printKeyValuePairs = (keysValues: {[key: string]: string}) => {
+  const colWidth = maxLength(Object.keys(keysValues))
+
+  return (prefix:string, format = defaultKeyValueFormat) => (
+    Object.keys(keysValues)
+      .map( (key:string) => format(prefix, fixWidth(key, colWidth), keysValues[key]) )
       .reduce( (accumulator, currentValue) => accumulator + currentValue + '\n', '' )
   )
 }
@@ -39,4 +49,4 @@ const printList = (list:string[]) => {
     logcode(line)
 }
 
-export {printEnum, fixWidth, defaultFormat, maxLength, printList}
+export {printEnum, printKeyValuePairs, fixWidth, defaultKeyValueFormat as defaultFormat, maxLength, printList}

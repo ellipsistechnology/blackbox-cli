@@ -4,6 +4,7 @@ import Types from './Types.js'
 import { logem, logerror, logp } from "./logging.js"
 import fs from "fs"
 import path from "path"
+import { defaultFormat, printKeyValuePairs } from "./print-helper.js"
 
 export interface Extension {
     getConfig(): {name: string, types: string[]}
@@ -12,6 +13,13 @@ export interface Extension {
     delete?(): Promise<void> | void
     list?(): Promise<void> | void
     generate?(): Promise<void> | void
+}
+
+export interface ExtensionConfig {
+    path: string
+    name: string
+    types: {[key: string]: string}
+    commands: string[]
 }
 
 export default class ExtensionManager {
@@ -84,7 +92,7 @@ export default class ExtensionManager {
         const commands = ['add', 'update', 'delete', 'list', 'generate']
             .filter(m => typeof extModule.default.prototype[m] === 'function')
             
-        logp(`Found extension ${config.name} with type(s) ${config.types?.join(', ')} and command(s) ${commands.join(', ')}.`)
+        logp(`Found extension ${config.name} with type(s) ${Object.keys(config.types).join(', ')} and command(s) ${commands.join(', ')}.`)
 
         // Add extension to the blackbox.json file:
         serverManager.bbDoc.extensions.push({
@@ -111,9 +119,11 @@ export default class ExtensionManager {
             logp("No extensions found in blackbox.json.")
             return
         }
-        logp("Extensions:")
         bbConfig.extensions.forEach((ext: any) => {
-            logp(`${ext.name}: (${ext.commands.join('|')}) (${ext.types.join('|')})`)
+            logp(`${ext.name} (${ext.description}):`)
+            Object.keys(ext.types).forEach( (type: string) => {
+                logp(`    (${ext.commands.join('|')}) ${type} - ${ext.types[type]}`)
+            })
         })
     }
 
@@ -125,7 +135,7 @@ export default class ExtensionManager {
         }
         
         for(const extInfo of serverManager.bbDoc.extensions) {
-            if(extInfo.types.includes(type)) {
+            if(Object.keys(extInfo.types).includes(type)) {
                 if(!fs.existsSync(extInfo.path)) { 
                     logerror("Extension file "+extInfo.path+" not found.")
                     return null
@@ -141,5 +151,22 @@ export default class ExtensionManager {
             }
         }
         return null
+    }
+
+    async printExtensionTypes(
+        indent = "", 
+        format = defaultFormat
+    ) {
+        const serverManager = new ServerManager(this.config)
+        await serverManager.loadConfigJson()
+        if(!serverManager.bbDoc.extensions || serverManager.bbDoc.extensions.length <= 0) {
+            return ""
+        }
+        
+        const pairs = {} as {[key: string]: string}
+        serverManager.bbDoc.extensions
+            .forEach( (ext: ExtensionConfig) => Object.assign(pairs, ext.types) )
+        
+        return printKeyValuePairs(pairs)(indent, format)
     }
 }
