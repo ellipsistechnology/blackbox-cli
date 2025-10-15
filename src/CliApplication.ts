@@ -8,6 +8,7 @@ import ServerManager from './ServerManager.js'
 import DatatypeManager from './DatatypeManager.js'
 import RepositoryManager from './RepositoryManager.js';
 import Generator from './Generator.js'
+import ExtensionManager from './ExtensionManager.js'
 
 const keyValueFormat = (prefix:string, key:string, value:string) => prefix + code(key) + desc(value)
 
@@ -81,46 +82,51 @@ export default class CliApplication {
     }
   }
 
-  executeManagerMethod(command:string) {
+  async executeManagerMethod(command:string) {
 		if(this.args.length < 2) {
 			logerror("Error: Type was not provided for "+command+".");
 			this.printHelp();
 		}
 		else {
-      const type = Types[this.args[1] as keyof typeof Types]
-      if(!type) {
-        logerror("Unknown type "+this.args[1]+".")
-      }
-      else {
-        const manager = this.manager(type)
+      const type = this.args[1]
+      const manager = await this.manager(type)
 
-        if(manager && (<any>manager)[command]) {
-          try {
-            (<any>manager)[command]() // call the relevant command on the manager
-          } catch(err) {
-            logerror(`Failed to ${command} ${type}:`, err)
-          }
-        } else {
-          logerror(`Operation ${command} is not applicable to type ${this.args[1]}.`)
-        }
+      if(!manager || typeof (<any>manager)[command] !== 'function') {
+        logerror(`Operation ${command} is not applicable to type ${this.args[1]}.`)
+      }
+
+      try {
+        (<any>manager)[command]() // call the relevant command on the manager
+      } catch(err) {
+        logerror(`Failed to ${command} ${type}:`, err)
       }
 		}
 	}
 
-  manager(type:Types) {
+  async manager(type: string) {
     
     switch(type) {
-      case Types.server:
+      case 'server':
         return new ServerManager(this.options)
-		case Types.service:
-			return new ServiceManager(this.options)
-		case Types.datatype:
-			return new DatatypeManager(this.options)
-    case Types.repository:
-      return new RepositoryManager(this.options)
-		default:
-			logerror("Unknown type "+type+".")
-      return null
+      case 'service':
+        return new ServiceManager(this.options)
+      case 'datatype':
+        return new DatatypeManager(this.options)
+      case 'repository':
+        return new RepositoryManager(this.options)
+      case 'extension':
+        return new ExtensionManager(this.options)
+      default:
+        
+        // Check for extensions to handle this type:
+        const extension = await new ExtensionManager(this.options).getManager(type)
+        if(extension) {
+          return extension
+        }
+
+        // Unknown type:
+        logerror("Unsupported type "+type+".")
+        return null
 		}
   }
 }

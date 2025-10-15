@@ -22,11 +22,9 @@ const methodToOperation:{ [key: string]: string } = {
 }
 
 export default class ServiceManager {
-  config:CliConfig;
   apiManager:ApiManager;
 
-  constructor(options:CliConfig) {
-    this.config = options
+  constructor(private config: CliConfig) {
     this.apiManager = new ApiManager(this.config);
   }
 

@@ -1,4 +1,4 @@
-import CliOptions from "./CliConfig.js";
+import CliConfig from "./CliConfig.js";
 import ApiManager from './ServerManager.js'
 import { logerror, logp, code, logem, file } from "./logging.js";
 import {CONFIG_FILENAME, get} from './utils.js'
@@ -23,10 +23,10 @@ export interface Repository {
 }
 
 export default class RepositoryManager {
-  apiManager: ApiManager;
+  serverManager: ApiManager;
 
-  constructor(public options: CliOptions){
-    this.apiManager = new ApiManager(options);
+  constructor(public config: CliConfig){
+    this.serverManager = new ApiManager(config);
   }
 
   private ensureRepositories(bbDoc:any, repo:{file?:string, url?:string}) {
@@ -42,43 +42,43 @@ export default class RepositoryManager {
   }
 
   async add() {
-    if(this.options.file) {
+    if(this.config.file) {
       
-      await this.apiManager.loadConfigJson()
+      await this.serverManager.loadConfigJson()
       
       const repo = {
-        file: this.options.file
+        file: this.config.file
       } as Repository
       
-      if(!this.ensureRepositories(this.apiManager.bbDoc, repo)) {
+      if(!this.ensureRepositories(this.serverManager.bbDoc, repo)) {
         return // error already logged
       }
 
-      if(this.options.name) {
-        repo.name = this.options.name
+      if(this.config.name) {
+        repo.name = this.config.name
       }
 
-      this.apiManager.bbDoc.repositories.push(repo)
-      this.apiManager.writeConfigJson()
+      this.serverManager.bbDoc.repositories.push(repo)
+      this.serverManager.writeConfigJson()
       logem(`Successfully added repository ${file(repo.file)}.`)
     }
-    else if(this.options.url) {
-      await this.apiManager.loadConfigJson()
+    else if(this.config.url) {
+      await this.serverManager.loadConfigJson()
 
       const repo = {
-        url: this.options.url
+        url: this.config.url
       } as Repository
       
-      if(!this.ensureRepositories(this.apiManager.bbDoc, repo)) {
+      if(!this.ensureRepositories(this.serverManager.bbDoc, repo)) {
         return // error already logged
       }
 
-      if(this.options.name) {
-        repo.name = this.options.name
+      if(this.config.name) {
+        repo.name = this.config.name
       }
 
-      this.apiManager.bbDoc.repositories.push(repo)
-      this.apiManager.writeConfigJson()
+      this.serverManager.bbDoc.repositories.push(repo)
+      this.serverManager.writeConfigJson()
       logem(`Successfully added repository ${code(repo.url)}.`)
     }
     else {
@@ -87,24 +87,24 @@ export default class RepositoryManager {
   }
 
   async update() {
-    if(!this.options.file && !this.options.url) {
+    if(!this.config.file && !this.config.url) {
       logerror(`File or url must be provided for update.`)
     }
 
     // Set the repo name if both url and name are provided,
     // and the name is not already set in blackbox.json:
-    if(this.options.url && this.options.name) {
-      await this.apiManager.loadConfigJson()
-      if(this.apiManager.bbDoc.repositories) {
-        for(let repo of this.apiManager.bbDoc.repositories) {
-          if(repo.url === this.options.url && !repo.name) {
-            repo.name = this.options.name
-            this.apiManager.writeConfigJson()
+    if(this.config.url && this.config.name) {
+      await this.serverManager.loadConfigJson()
+      if(this.serverManager.bbDoc.repositories) {
+        for(let repo of this.serverManager.bbDoc.repositories) {
+          if(repo.url === this.config.url && !repo.name) {
+            repo.name = this.config.name
+            this.serverManager.writeConfigJson()
             logem(`Successfully set name of repository ${code(repo.url)} to ${code(repo.name)}.`)
             return
           }
         }
-        logerror(`No repository with url ${code(this.options.url)} found in ${CONFIG_FILENAME}.`)
+        logerror(`No repository with url ${code(this.config.url)} found in ${CONFIG_FILENAME}.`)
         return
       }
       logerror(`No repositories found in ${CONFIG_FILENAME}.`)
@@ -113,9 +113,9 @@ export default class RepositoryManager {
   }
 
   async list() {
-    await this.apiManager.loadConfigJson()
+    await this.serverManager.loadConfigJson()
     printList(
-      this.apiManager.bbDoc.repositories
+      this.serverManager.bbDoc.repositories
       .map((repo:any) => (
         repo.name ? repo.name+": " : '') + 
         (repo.file ? "file="+repo.file : "url="+repo.url)
@@ -124,20 +124,20 @@ export default class RepositoryManager {
   }
 
   async delete() {
-    if(this.options.file === "" && this.options.url === "") {
+    if(this.config.file === "" && this.config.url === "") {
       logerror(`File or url must be provided for delete.`)
     }
 
-    await this.apiManager.loadConfigJson()
+    await this.serverManager.loadConfigJson()
     let repo
-    for(let i in this.apiManager.bbDoc.repositories){
-      if(this.apiManager.bbDoc.repositories[i].file === this.options.file || this.apiManager.bbDoc.repositories[i].url === this.options.url) {
-        repo = this.apiManager.bbDoc.repositories[i]
-        this.apiManager.bbDoc.repositories = this.apiManager.bbDoc.repositories.slice(0, i).concat(this.apiManager.bbDoc.repositories.slice(i+1))
+    for(let i in this.serverManager.bbDoc.repositories){
+      if(this.serverManager.bbDoc.repositories[i].file === this.config.file || this.serverManager.bbDoc.repositories[i].url === this.config.url) {
+        repo = this.serverManager.bbDoc.repositories[i]
+        this.serverManager.bbDoc.repositories = this.serverManager.bbDoc.repositories.slice(0, i).concat(this.serverManager.bbDoc.repositories.slice(i+1))
         break;
       }
     }
-    this.apiManager.writeConfigJson()
+    this.serverManager.writeConfigJson()
     logem(`Successfully deleted repository ${code(JSON.stringify(repo))}.`)
   }
 
@@ -160,7 +160,7 @@ export default class RepositoryManager {
     }
 
     // Create name from url:
-    let path = './.bb/repositories/' + (this.options.name || url.replace(/[^a-zA-Z0-9_.]/g, '_'))
+    let path = './.bb/repositories/' + (this.config.name || url.replace(/[^a-zA-Z0-9_.]/g, '_'))
     if(!path.endsWith('.json')) {
       path += '.json'
     }
@@ -197,12 +197,12 @@ export default class RepositoryManager {
    * @return A DataTypeWrapper containing the repository's URI and the datatype.
    */
   async findRepositoryForDatatype(datatype: string): Promise<RepoWrapper|undefined> {
-    await this.apiManager.loadConfigJson();
-    if(!this.apiManager.bbDoc.repositories) {
+    await this.serverManager.loadConfigJson();
+    if(!this.serverManager.bbDoc.repositories) {
       return undefined
     }
 
-    for(let repo of this.apiManager.bbDoc.repositories) {
+    for(let repo of this.serverManager.bbDoc.repositories) {
       let data:any
 
       if(repo.file) {

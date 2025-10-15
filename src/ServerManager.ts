@@ -92,25 +92,17 @@ export default class ServerManager {
   }
 
 	writeApiJson() {
-    fs.writeFile(OPENAPI_FILENAME, JSON.stringify(this.openapiDoc, null, 2), (err) => {
-      if(err)
-        console.error(`Failed to write to ${OPENAPI_FILENAME}: ${err}`)
-    })
+    fs.writeFileSync(OPENAPI_FILENAME, JSON.stringify(this.openapiDoc, null, 2))
 	}
 
   writeConfigJson() {
-    fs.writeFile(CONFIG_FILENAME, JSON.stringify(this.bbDoc, null, 2), (err) => {
-      if(err)
-        console.error(`Failed to write to ${CONFIG_FILENAME}: ${err}`)
-    })
+    fs.writeFileSync(CONFIG_FILENAME, JSON.stringify(this.bbDoc, null, 2))
   }
 
   writePackageJson(json: any) {
-    fs.writeFile(PACKAGE_FILENAME, JSON.stringify(json, null, 2), (err) => {
-      if(err)
-        console.error(`Failed to write to ${PACKAGE_FILENAME}: ${err}`)
-    })
+    fs.writeFileSync(PACKAGE_FILENAME, JSON.stringify(json, null, 2))
   }
+
 	getSchemas():any {
 		return this.openapiDoc.components.schemas
 	}

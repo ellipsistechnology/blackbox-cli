@@ -9,12 +9,12 @@ import RepositoryManager, { RepoWrapper } from './RepositoryManager.js';
 // TODO allow add from repository
 
 export default class DatatypeManager {
-  apiManager:ServerManager;
+  serverManager:ServerManager;
 
   constructor(
     public config: CliConfig
   ) {
-    this.apiManager = new ServerManager(config);
+    this.serverManager = new ServerManager(config);
   }
 
   private deepCopy(src:any):any {
@@ -125,7 +125,7 @@ export default class DatatypeManager {
   }
 
   private putDatatype(name:string, datatype:any=undefined, allowReplace=false, repoWrapper:RepoWrapper|undefined=undefined) {
-    let schemas = this.apiManager.getSchemas()
+    let schemas = this.serverManager.getSchemas()
     if(!allowReplace && schemas[name]) {
       logerror(`Datatype with name ${name} already exists; Datatype not added.`)
       return
@@ -137,20 +137,20 @@ export default class DatatypeManager {
     }
 
     if(repoWrapper) {
-      this.addDependantDatatypes(this.apiManager.openapiDoc, repoWrapper, name)
+      this.addDependantDatatypes(this.serverManager.openapiDoc, repoWrapper, name)
     } else {
       this.mapRefs(datatype)
       schemas[name] = datatype
     }
 
 
-    this.apiManager.writeApiJson()
+    this.serverManager.writeApiJson()
     logem(`Successfully ${allowReplace?'updated':'added'} datatype ${code(name)}`)
   }
 
   async add() {
     try {
-      await this.apiManager.loadOpenApiJson()
+      await this.serverManager.loadOpenApiJson()
 
       // If source file is provided then read from that:
       if(this.config.file) {
@@ -250,9 +250,9 @@ export default class DatatypeManager {
    * Update an existing datatype in openapi.json.
    */
   async update() {
-    await this.apiManager.loadOpenApiJson()
+    await this.serverManager.loadOpenApiJson()
     try {
-      let schemas = this.apiManager.getSchemas()
+      let schemas = this.serverManager.getSchemas()
   		if(!this.config.name) {
         logerror("Name not found. Use -n or --name to supply a name for the datatype you wish to update.")
         return
@@ -281,7 +281,7 @@ export default class DatatypeManager {
         }
       }
 
-      this.apiManager.writeApiJson();
+      this.serverManager.writeApiJson();
     }
     catch(err) {
       logerror(`Failed to update datatype: ${err}`, err)
@@ -290,8 +290,8 @@ export default class DatatypeManager {
 
   async list() {
     try {
-      await this.apiManager.loadOpenApiJson()
-      let schemas = this.apiManager.getSchemas()
+      await this.serverManager.loadOpenApiJson()
+      let schemas = this.serverManager.getSchemas()
       if(schemas)
         printList(Object.keys(schemas))
       else
@@ -304,7 +304,7 @@ export default class DatatypeManager {
   datatypeInUse():boolean {
 		// \{\s*\"\$ref\"\s*\:\s*\"#\/components\/schemas\/service\"\s*\}
     const pattern = new RegExp("\\{\\s*\\\"\\$ref\\\"\\s*\\:\\s*\\\"#\\/components\\/schemas\\/"+this.config.name+"\\\"\\s*\\}")
-    return JSON.stringify(this.apiManager.openapiDoc).match(pattern) !== null
+    return JSON.stringify(this.serverManager.openapiDoc).match(pattern) !== null
 	}
 
   async delete() {
@@ -316,15 +316,15 @@ export default class DatatypeManager {
 
     // Prompt and delete:
     try {
-      await this.apiManager.loadOpenApiJson()
-      let schemas = this.apiManager.getSchemas()
+      await this.serverManager.loadOpenApiJson()
+      let schemas = this.serverManager.getSchemas()
       if(schemas[this.config.name]) {
         const message = this.datatypeInUse() ?
             "Datatype "+this.config.name+" is in use, do you still want to delete it? (y/n): " :
             "Are you sure you want to delete datatype "+this.config.name+"? (y/n): ";
         if(readlineSync.question(message) === 'y') {
           delete schemas[this.config.name]
-          this.apiManager.writeApiJson()
+          this.serverManager.writeApiJson()
           logem(`Datatype ${this.config.name} deleted`)
         }
       }
