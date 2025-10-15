@@ -9,7 +9,7 @@ export default class TestExtension {
         }
     }
 
-    add() {
-        console.log("TestExtension add")
+    add(type) {
+        console.log("TestExtension add for type "+type)
     }
 }

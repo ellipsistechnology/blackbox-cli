@@ -101,7 +101,7 @@ export default class CliApplication {
       }
 
       try {
-        (<any>manager)[command]() // call the relevant command on the manager
+        (<any>manager)[command](type) // call the relevant command on the manager
       } catch(err) {
         logerror(`Failed to ${command} ${type}`)
         console.error(err)

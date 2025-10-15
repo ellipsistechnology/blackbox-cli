@@ -8,11 +8,11 @@ import { defaultFormat, printKeyValuePairs } from "./print-helper.js"
 
 export interface Extension {
     getConfig(): {name: string, types: string[]}
-    add?(): Promise<void> | void
-    update?(): Promise<void> | void
-    delete?(): Promise<void> | void
-    list?(): Promise<void> | void
-    generate?(): Promise<void> | void
+    add?(type: string): Promise<void> | void
+    update?(type: string): Promise<void> | void
+    delete?(type: string): Promise<void> | void
+    list?(type: string): Promise<void> | void
+    generate?(type: string): Promise<void> | void
 }
 
 export interface ExtensionConfig {
@@ -25,7 +25,7 @@ export interface ExtensionConfig {
 export default class ExtensionManager {
     constructor(private config: CliConfig) {}
     
-    async add(overwrite = false) {
+    async add(_: string, overwrite = false) {
         if(!this.config.file) {
             logerror("Please provide a javascript source file with -f or --file.")
             return
@@ -106,7 +106,7 @@ export default class ExtensionManager {
     }
 
     update() {
-        this.add(true)
+        this.add('extension', true)
     }
 
     list() {

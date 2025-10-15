@@ -56,7 +56,6 @@ export default class ServiceManager {
       }
       
       let path = parentPath.endsWith('/') ? parentPath+this.config.name : parentPath+'/'+this.config.name
-      const pathParams = extractPathParams(path)
 
       if(this.apiManager.openapiDoc.paths[path]) {
         logerror("A service already exists at path "+path)
@@ -69,7 +68,7 @@ export default class ServiceManager {
           datatype: this.config.datatype,
           access: this.config.access,
           identifier: this.config.identifier,
-          pathParams
+          pathParams: extractPathParams(path)
         })
         logp(`Added path ${code(path)}`)
       }
@@ -108,7 +107,7 @@ export default class ServiceManager {
           operationId: this.makeOperationId('get'),
           serviceName: toCammelCase(this.config.name!, true),
           datatype: this.config.datatype,
-          pathParams: pathParams
+          pathParams: extractPathParams(path)
         })
         logp(`Added path ${code(path)}`)
       }
