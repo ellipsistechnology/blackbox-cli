@@ -15,6 +15,12 @@ ${Object.keys(openapiDoc.paths).map( (path: string) => {
     }
     const operationId = pathItem.options.operationId
     return `export function ${operationId}(req: any, res: any) {
+    // Manually add the CORS headers.
+    // Required due to a bug in swagger-tools-oas3:
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    
     const opts = Object.keys(wrapper.openapiDoc.paths[req.openapi.openApiRoute])
         .filter(method => !method.startsWith('x-'))
     res.status(200).set("Allow", opts).json({})

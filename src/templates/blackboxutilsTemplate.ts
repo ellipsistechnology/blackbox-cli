@@ -110,10 +110,12 @@ export function makeService(req: any, openapiDoc: any): Service | Metadata {
         return {}
     }
     const schema = req.openapi.schema.responses['200'].content['application/json'].schema;
+    const serviceNode = openapiDoc.paths[req.openapi.openApiRoute]
 
     return {
         name: req.openapi.openApiRoute.substring(req.openapi.openApiRoute.lastIndexOf('/')+1).replaceAll('/', ''),
-        description: req.openapi.schema.description,
+        summary: serviceNode.summary,
+        description: serviceNode.description,
         href: req.openapi.openApiRoute,
         type: {
             format: "oas3",

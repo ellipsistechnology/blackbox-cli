@@ -12,7 +12,7 @@
     "src/**/*",
     "gensrc/**/*", 
     "index.ts"
-  ],
+, "src/Generator.ts"  ],
   "exclude": [
     "node_modules",
     "**/*.spec.ts"

@@ -30,6 +30,12 @@ class RootController {
 const rootController = new RootController()
 
 export function getRootService(req: any, res: any) {
+    // Manually add the CORS headers.
+    // Required due to a bug in swagger-tools-oas3:
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+
     res.status(200).json(rootController.getRootService(req))
 }`
 }

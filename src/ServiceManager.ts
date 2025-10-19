@@ -70,6 +70,8 @@ export default class ServiceManager {
           identifier: this.config.identifier,
           pathParams: extractPathParams(path)
         })
+        this.apiManager.openapiDoc.paths[path].summary = this.config.summary || `Operations on ${this.config.name}`
+        this.apiManager.openapiDoc.paths[path].description = this.config.description || (`This service allows ${this.config.access === 'unique' ? 'access to a unique' : 'management of'} ${this.config.datatype} object${this.config.access === 'unique' ? '' : 's'}.`)
         logp(`Added path ${code(path)}`)
       }
 
@@ -152,6 +154,11 @@ export default class ServiceManager {
   }
 
   // TODO: Allow changing of access.
+  // TODO: Allow changing summary and description.
+  /**
+   * Update a service's methods and/or datatype.
+   * @returns 
+   */
   async update() {
     await this.apiManager.loadOpenApiJson()
 

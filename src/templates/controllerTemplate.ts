@@ -45,8 +45,8 @@ const wrapper = new ServiceWrapper()
 
         // For each operation in the path, add a controller function:
         Object.keys(pathItem).forEach( (method) => {
-            // Skip options (handled by OptionsController), head and trace (not supported), and the x-bb-service extension:
-            if(method === 'options' || method === 'head' || method === 'trace' || method === 'x-bb-service') {
+            // Skip options (handled by OptionsController), head and trace (not supported), and non-method nodes:
+            if(method === 'options' || method === 'head' || method === 'trace' || method === 'x-bb-service' || method === 'summary' || method === 'description') {
                 return
             }
 
@@ -67,6 +67,13 @@ const wrapper = new ServiceWrapper()
         }
 `
 
+            const corsHeaders = `// Manually add the CORS headers.
+    // Required due to a bug in swagger-tools-oas3:
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+`
+
             // Get for a service node (unique object or list of objects with identifier/index)
             // or an object node:
             if(method === 'get') {
@@ -75,9 +82,10 @@ const wrapper = new ServiceWrapper()
                 const hasSubpaths = Object.keys(openapiDoc.paths).some( p => p !== path && p.startsWith(path.endsWith('/') ? path : path + '/') )
                 controllerList[fileName] += `// Get the ${isUnique ? 'unique' : !isObject ? 'list of' : ''} object${isUnique || isObject ? '' : 's'} for '${path}':
 export function ${operationId}(req: any, res: any) {
+    ${corsHeaders}
     const meta = req.query.meta
     ${pathParamsDefinitions}
-    if(meta) {
+    if(meta !== undefined) {
         // Call the user specified metatdata function if it exists:
         if(typeof wrapper.service.${operationId}Meta === 'function') { 
           const metadata = wrapper.service.${operationId}Meta( {${pathParamsList}} )
@@ -102,6 +110,7 @@ export function ${operationId}(req: any, res: any) {
             if(method === 'delete') {
                 controllerList[fileName] += `// Delete an existing object:
 export function ${operationId}(req: any, res: any) {
+    ${corsHeaders}
     ${functionCheck}
     ${pathParamsDefinitions}
     wrapper.service.${operationId}({${pathParamsList}})
@@ -127,6 +136,7 @@ export function ${operationId}(req: any, res: any) {
                 }
                 controllerList[fileName] += `// Create a new ${datatype} object:
 export function ${operationId}(req: any, res: any) {
+    ${corsHeaders}
     ${functionCheck}
     ${pathParamsDefinitions}
     const data = wrapper.service.${operationId}({data: req.body, ${pathParamsList}})
@@ -150,6 +160,7 @@ export function ${operationId}(req: any, res: any) {
             if(method === 'put') {
                 controllerList[fileName] += `// Replace an existing ${datatype} object:
 export function ${operationId}(req: any, res: any) {
+    ${corsHeaders}
     ${functionCheck}
     ${pathParamsDefinitions}
     wrapper.service.${operationId}({data: req.body, ${pathParamsList}})
@@ -164,6 +175,7 @@ export function ${operationId}(req: any, res: any) {
             if(method === 'patch') {
                 controllerList[fileName] += `// Update an existing ${datatype} object:
 export function ${operationId}(req: any, res: any) {
+    ${corsHeaders}
     ${functionCheck}
     ${pathParamsDefinitions}
     wrapper.service.${operationId}({data: req.body, ${pathParamsList}})
