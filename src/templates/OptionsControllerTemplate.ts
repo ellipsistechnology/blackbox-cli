@@ -19,7 +19,8 @@ ${Object.keys(openapiDoc.paths).map( (path: string) => {
     // Required due to a bug in swagger-tools-oas3:
     res.setHeader('Access-Control-Allow-Origin', '*')
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    res.setHeader('Access-Control-Allow-Headers', 'Allow, Content-Type, Authorization')
+    res.setHeader('Access-Control-Expose-Headers', 'Allow, Content-Type, Authorization')
     
     const opts = Object.keys(wrapper.openapiDoc.paths[req.openapi.openApiRoute])
         .filter(method => !method.startsWith('x-'))

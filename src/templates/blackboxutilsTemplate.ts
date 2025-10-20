@@ -98,6 +98,14 @@ export function getNodeService(req: any, openapiDoc: any) {
     return openapiDoc.paths[req.openapi.openApiRoute]['x-bb-service']
 }
 
+function pathParamReplace(path: string, pathParams: any): string {
+    let href = path
+    for(const param in pathParams) {
+        href = href.replace(\`{\${param}}\`, pathParams[param])
+    }
+    return href
+}
+
 /**
  * Creates a service object for the 
  * @param req 
@@ -116,7 +124,7 @@ export function makeService(req: any, openapiDoc: any): Service | Metadata {
         name: req.openapi.openApiRoute.substring(req.openapi.openApiRoute.lastIndexOf('/')+1).replaceAll('/', ''),
         summary: serviceNode.summary,
         description: serviceNode.description,
-        href: req.openapi.openApiRoute,
+        href: pathParamReplace(req.openapi.openApiRoute, req.openapi.pathParams),
         type: {
             format: "oas3",
             schema
@@ -131,6 +139,7 @@ export function makeServiceList(req: any, openapiDoc: any): ServiceList & Metada
     return {
         services: Object.keys(openapiDoc.paths)
             .filter(path => path.startsWith(root) && !path.slice(root.length+1).includes('/') && path !== root)
+            .map(path => pathParamReplace(path, req.openapi.pathParams))
             .map(path => ({
                 name: path.slice(path.lastIndexOf('/')).replaceAll('/', ''),
                 href: path

@@ -65,7 +65,7 @@ export default function (openapiDoc: any, {serviceName: name, methods}:TemplateM
   return `import {serviceClass, autowired} from 'ellipsis-ioc'
 ${imports}
 
-@serviceClass('${classVarName}-service')
+@serviceClass('${classVarName}')
 export class ${className}Service {
 
   @autowired('openapi-doc')
