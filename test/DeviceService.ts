@@ -2,40 +2,7 @@ import {serviceClass, autowired} from 'ellipsis-ioc'
 import IotDevice from './IotDevice.js'
 import IndexResponse from '../gensrc/IndexResponse.js'
 
-const devices: {
-  [locationname: string]: IotDevice[]
-} = {
-  Office: [
-    {
-      type: 'TemperatureSensor',
-      state: 'active'
-    },
-    {
-      type: 'HumiditySensor',
-      state: 'inactive'
-    }
-  ],
-  Warehouse: [
-    {
-      type: 'lightSensor',
-      state: 'on'
-    },
-    {
-      type: 'light',
-      state: 'off'
-    }
-  ],
-  'Remote Site': [
-    {
-      type: 'Camera',
-      state: 'recording'
-    },
-    {
-      type: 'DoorLock',
-      state: 'locked'
-    }
-  ]
-}
+import {locations} from './LocationService.js'
 
 @serviceClass('device')
 export class DeviceService {
@@ -47,48 +14,55 @@ export class DeviceService {
   }
   
   getDeviceList({locationname}: {locationname: string}): IotDevice[] {
-    if(!devices[locationname]) {
+    const location = locations.find(loc => loc.name === locationname)
+    if(!location) {
       throw new Error(`Location ${locationname} not found.`)
     }
-    return devices[locationname] || []
+    return location.devices || []
   }
 
   createDevice({locationname, data}: {locationname: string, data: IotDevice}): IndexResponse {
-    if(!devices[locationname]) {
+    const location = locations.find(loc => loc.name === locationname)
+    if(!location) {
       throw new Error(`Location ${locationname} not found.`)
     }
-    devices[locationname].push(data)
-    return {
-      index: (devices[locationname]?.length) - 1
-    }
+    const index = location.devices.push(data)
+    return { index }
   }
 
   getDevice({locationname, deviceindex}: {locationname: string, deviceindex: number}): IotDevice {
-    return devices[locationname]?.[deviceindex]
+    const location = locations.find(loc => loc.name === locationname)
+    if(!location) {
+      throw new Error(`Location ${locationname} not found.`)
+    }
+    return location.devices[deviceindex]
   }
 
   replaceDevice({locationname, deviceindex, data}: {locationname: string, deviceindex: number, data: IotDevice}): void {
-    if(!devices[locationname]) {
+    const location = locations.find(loc => loc.name === locationname)
+    if(!location) {
       throw new Error(`Location ${locationname} not found.`)
     }
-    devices[locationname][deviceindex] = data
+    location.devices[deviceindex] = data
   }
 
   updateDevice({locationname, deviceindex, data}: {locationname: string, deviceindex: number, data: IotDevice}): void {
-    if(!devices[locationname]) {
+    const location = locations.find(loc => loc.name === locationname)
+    if(!location) {
       throw new Error(`Location ${locationname} not found.`)
     }
-    const existingDevice = devices[locationname][deviceindex]
-    devices[locationname][deviceindex] = {
+    const existingDevice = location.devices[deviceindex]
+    location.devices[deviceindex] = {
       ...existingDevice,
       ...data
     }
   }
 
   deleteDevice({locationname, deviceindex}: {locationname: string, deviceindex: number}): void {
-    if(!devices[locationname]) {
+    const location = locations.find(loc => loc.name === locationname)
+    if(!location) {
       throw new Error(`Location ${locationname} not found.`)
     }
-    devices[locationname].splice(deviceindex, 1)
+    location.devices.splice(deviceindex, 1)
   }
 }

@@ -46,6 +46,13 @@ async function init() {
     const options = {
         routing: { 
             controllers: await getControllers()
+        },
+        cors: {
+            origin: '*',
+            methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+            allowedHeaders: 'Allow, Content-Type, Authorization',
+            exposedHeaders: 'Allow, Content-Type, Authorization',
+            preflightContinue: true
         }
     } as any; 
 

@@ -105,6 +105,21 @@ function pathParamReplace(path: string, pathParams: any): string {
     }
     return href
 }
+    
+// TODO: Allow configuration of base URL and path to api-specifications.yaml
+function convertSchemaPathsToURLs(schema: any, baseUrl: string): {href: string} | OpenAPISchema | undefined {
+    if(schema.type === 'array' && schema.items?.['$ref'] && typeof schema.items['$ref'] === 'string' && schema.items['$ref'].startsWith('#/')) {
+        return {href: baseUrl + schema.items['$ref']}
+    } 
+    // TODO: Check for $ref without array - should never happen since we're only this for services which always return arrays
+    // TODO: If not a ref, and type is object, recursively check properties - should never happen since we're only this for services which always return arrays
+    // TODO: If not a ref, and type is array, recursively check items
+    // else if(schema.type === 'object' && schema.properties) {
+    //     for(const prop in schema.properties) {
+    //         convertSchemaPathsToURLs(schema.properties[prop], baseUrl)
+    //     }
+    // }
+}
 
 /**
  * Creates a service object for the 
@@ -117,7 +132,9 @@ export function makeService(req: any, openapiDoc: any): Service | Metadata {
     if(!bbService) {
         return {}
     }
-    const schema = req.openapi.schema.responses['200'].content['application/json'].schema;
+    const schema = convertSchemaPathsToURLs(
+        req.openapi.schema.responses['200'].content['application/json'].schema, 
+        '/api-specifications.yaml')
     const serviceNode = openapiDoc.paths[req.openapi.openApiRoute]
 
     return {

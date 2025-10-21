@@ -67,12 +67,12 @@ const wrapper = new ServiceWrapper()
         }
 `
 
-            const corsHeaders = `// Manually add the CORS headers.
+            const corsHeaders = ''/*`// Manually add the CORS headers.
     // Required due to a bug in swagger-tools-oas3:
     res.setHeader('Access-Control-Allow-Origin', '*')
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-`
+`*/
 
             // Get for a service node (unique object or list of objects with identifier/index)
             // or an object node:
