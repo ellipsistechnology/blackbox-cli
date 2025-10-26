@@ -45,6 +45,11 @@ export default class ServerManager {
     }
   }
 
+  loadConfigJsonSync(): void {
+    const data = fs.readFileSync(CONFIG_FILENAME)
+    this.bbDoc = JSON.parse(data.toString())
+  }
+
   async loadConfigJson() {
     return new Promise<void>( (resolve, reject) => {
       fs.readFile(CONFIG_FILENAME, (err:any, data:any) => {

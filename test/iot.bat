@@ -60,4 +60,12 @@ call ../bb.bat list extension
 
 call ../bb.bat add test
 
+call ../bb.bat add extension -f ../../../bb-com-extension/dist/index.js
+
+call  ../bb.bat add service -n comm -d string --access unique
+
+call ../bb.bat generate service
+
+call ../bb.bat generate server
+
 cd ..

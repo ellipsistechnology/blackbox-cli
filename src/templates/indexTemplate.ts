@@ -7,7 +7,7 @@ import * as oas3Tools from 'swagger-tools-oas3'
 import * as http from 'http'
 import * as fs from 'fs'
 import {getControllers} from './gensrc/blackbox-utils.js'
-import {factory, loadSrcFiles} from 'ellipsis-ioc'
+import {callServices, factory, loadSrcFiles, taggedService} from 'ellipsis-ioc'
 
 // ----------------------------------------------------
 // Define __dirname for ES Modules
@@ -32,42 +32,43 @@ class _InitIoc {
     getOasDoc() {
         return openapiDoc
     }
+
+    // Initialize the server and load controllers:
+    @taggedService('init', 'server')
+    async init() {
+
+        // Load all source files to ensure annotations are read:
+        searchPaths.forEach(path => {
+            loadSrcFiles(path)
+        })
+
+        // Load controllers dynamically:
+        const options = {
+            routing: { 
+                controllers: await getControllers()
+            },
+            cors: {
+                origin: '*',
+                methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+                allowedHeaders: 'Allow, Content-Type, Authorization',
+                exposedHeaders: 'Allow, Content-Type, Authorization',
+                preflightContinue: true
+            }
+        } as any; 
+
+        // Initialize the Express app:
+        const expressAppConfig = oas3Tools.expressAppConfig(openapiDocPath, options);
+        const app = expressAppConfig.getApp();
+
+        // Start the HTTP server:
+        http.createServer(app).listen(serverPort, () => {
+            console.log('Server started at '+new Date().toISOString())
+            console.log('Server is listening on port '+serverPort)
+            console.log('Swagger UI is available at http://localhost:'+serverPort+'/docs')
+        });
+    }
 }
 
-// Initialize the server and load controllers:
-async function init() {
-
-    // Load all source files to ensure annotations are read:
-    searchPaths.forEach(path => {
-        loadSrcFiles(path)
-    })
-
-    // Load controllers dynamically:
-    const options = {
-        routing: { 
-            controllers: await getControllers()
-        },
-        cors: {
-            origin: '*',
-            methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-            allowedHeaders: 'Allow, Content-Type, Authorization',
-            exposedHeaders: 'Allow, Content-Type, Authorization',
-            preflightContinue: true
-        }
-    } as any; 
-
-    // Initialize the Express app:
-    const expressAppConfig = oas3Tools.expressAppConfig(openapiDocPath, options);
-    const app = expressAppConfig.getApp();
-
-    // Start the HTTP server:
-    http.createServer(app).listen(serverPort, () => {
-        console.log('Server started at '+new Date().toISOString())
-        console.log('Server is listening on port '+serverPort)
-        console.log('Swagger UI is available at http://localhost:'+serverPort+'/docs')
-    });
-}
-
-init()
+setTimeout(() => callServices('init'), 500); // Delay to allow all annotations to be processed.
 `
 }

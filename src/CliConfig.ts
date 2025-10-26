@@ -2,8 +2,10 @@ import {Option, program} from 'commander'
 import {defaultFormat, fixWidth, maxLength} from './print-helper.js'
 import fs from 'fs'
 import { setVerboseLogging } from './logging.js';
+import ServerManager from './ServerManager.js';
 
 export default class CliConfig {
+  // Common options:
   name?:string
   title?:string
   description?:string
@@ -18,6 +20,9 @@ export default class CliConfig {
   sourceData:string | undefined
   access?: 'unique' | 'id' | 'index' = 'id'
   identifier?: string
+
+  // Additional options from extensions:
+  [opt: string]: any
 
   constructor(args:string[]) {
     program
@@ -38,41 +43,57 @@ export default class CliConfig {
       .option('--dest <dest>', "Destination path for generated files.")
     	.option('--summary <summary>', "Summary for a service.")
       .option('-v, --verbose', "Display verbose output.")
-      .allowExcessArguments(true)
-      .parse(args);
-
-    const opts = program.opts()
     
-    Object.keys(opts).forEach( (opt:string) => {
-      switch(opt) {
-      case 'name':
-        this.name = opts[opt]; break
-      case 'title':
-        this.title = opts[opt]; break
-      case 'desc':
-        this.description = opts[opt]; break
-      case 'file':
-        this.file = opts[opt]; break
-      case 'datatype':
-        this.datatype = opts[opt]; break
-      case 'path':
-        this.path = opts[opt]; break
-      case 'summary':
-        this.summary = opts[opt]; break
-      case 'methods':
-        this.methods = opts[opt]; break
-      case 'access':
-        this.access = opts[opt]; break
-      case 'identifier':
-        this.identifier = opts[opt]; break
-      case 'all':
-        this.all = opts[opt]; break
-      case 'dest':
-        this.dest = opts[opt]; break
-      case 'url':
-        this.url = opts[opt]; break
+    // Add options from extensions:
+    const serverManager = new ServerManager(this)
+    serverManager.loadConfigJsonSync()
+    serverManager.bbDoc.extensions.forEach((ext: any) => {
+      if(ext.options) {
+        Object.entries(ext.options).forEach(([option, description]) => {
+          program.option(option, <string>description)
+        })
       }
     })
+    
+    program.allowExcessArguments(true)
+    
+    program.parse(args);
+
+    const opts = program.opts()
+
+    Object.assign(this, opts)
+    
+    
+    // Object.keys(opts).forEach( (opt:string) => {
+    //   switch(opt) {
+    //   case 'name':
+    //     this.name = opts[opt]; break
+    //   case 'title':
+    //     this.title = opts[opt]; break
+    //   case 'desc':
+    //     this.description = opts[opt]; break
+    //   case 'file':
+    //     this.file = opts[opt]; break
+    //   case 'datatype':
+    //     this.datatype = opts[opt]; break
+    //   case 'path':
+    //     this.path = opts[opt]; break
+    //   case 'summary':
+    //     this.summary = opts[opt]; break
+    //   case 'methods':
+    //     this.methods = opts[opt]; break
+    //   case 'access':
+    //     this.access = opts[opt]; break
+    //   case 'identifier':
+    //     this.identifier = opts[opt]; break
+    //   case 'all':
+    //     this.all = opts[opt]; break
+    //   case 'dest':
+    //     this.dest = opts[opt]; break
+    //   case 'url':
+    //     this.url = opts[opt]; break
+    //   }
+    // })
 
     if(opts.verbose)
       console.log(`Verbose logging enabled`)

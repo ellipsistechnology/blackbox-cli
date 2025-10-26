@@ -23,7 +23,10 @@ export interface ExtensionConfig {
 }
 
 export default class ExtensionManager {
-    constructor(private config: CliConfig) {}
+    constructor(
+        private config: CliConfig,
+        private serverManager: ServerManager
+    ) {}
     
     async add(_: string, overwrite = false) {
         if(!this.config.file) {
@@ -38,19 +41,39 @@ export default class ExtensionManager {
             return
         }
 
+        // Load the file and create an instance to get the config:
+        const extModule = await import("file://"+srcPath)
+        const constructorFunc = typeof extModule.default === 'function' ? extModule.default : extModule.default?.default
+        if(typeof constructorFunc !== 'function') {
+            logerror("No default export found in extension file.")
+            return
+        }
+        const instance = new constructorFunc()
+        if(typeof instance.getConfig !== 'function') {
+            logerror("Extension class does not have a getConfig() method.")
+            return
+        }
+        const config = instance.getConfig()
+        if(!config?.name) {
+            logerror("Extension does not provide a name.")
+            return
+        }
+        if(!config?.types) {
+            logerror("Extension does not provide any types.")
+            return
+        }
+
         // Check if the extension has already been added:
-        // let bbConfig = JSON.parse(fs.readFileSync("blackbox.json", "utf-8"))
-        const serverManager = new ServerManager(this.config)
-        await serverManager.loadConfigJson()
-        if(!serverManager.bbDoc.extensions) serverManager.bbDoc.extensions = []
-        let destPath = path.resolve(".bb/extensions/"+this.config.file.split("/").pop())
-        if(Object.values(serverManager.bbDoc.extensions).some((v: any) => v.path === destPath)) {
+        if(!this.serverManager.bbDoc.extensions) this.serverManager.bbDoc.extensions = []
+        let destPath = path.resolve(".bb/extensions/"+config.name+'-'+this.config.file.split("/").pop())
+
+        if(Object.values(this.serverManager.bbDoc.extensions).some((v: any) => v.path === destPath)) {
             if(overwrite) {
                 // Delete the file so we can copy the new one:
                 fs.unlinkSync(destPath)
 
                 // Remove from blackbox.json so we can re-add it:
-                serverManager.bbDoc.extensions = serverManager.bbDoc.extensions.filter((v: any) => v.path !== destPath)
+                this.serverManager.bbDoc.extensions = this.serverManager.bbDoc.extensions.filter((v: any) => v.path !== destPath)
             } else {
                 logerror("Extension for file "+this.config.file+" already exists.")
                 return
@@ -65,43 +88,58 @@ export default class ExtensionManager {
         fs.copyFileSync(srcPath, destPath)
 
         // Check that the extension is a valid class:
-        const extModule = await import("file://"+srcPath)
-        let config
-        if(!extModule.default) {
-            logerror("No default export found in extension file.")
-            return
-        }
+        // const extModule = await import("file://"+srcPath)
+        // let config
+        // if(!extModule.default) {
+        //     logerror("No default export found in extension file.")
+        //     return
+        // }
 
         // Create an instance of the class to get its config:
-        const extInstance = new extModule.default()
-        if(typeof extInstance.getConfig !== 'function') {
-            logerror("Extension class does not have a getConfig() method.")
-            return
-        }
-        config = extInstance.getConfig()
-        if(!config?.name) {
-            logerror("Extension does not provide a name.")
-            return
-        }
-        if(!config?.types) {
-            logerror("Extension does not provide any types.")
-            return
-        }
+        // let extInstance
+        // try {
+        //     extInstance = new extModule.default()
+        // } catch (e) {}
+        // if(!extInstance) {
+        //     try {
+        //         extInstance = new extModule.default.default()
+        //     } catch (e) {
+        //         logerror("Could not create an instance of the extension class.")
+        //         return
+        //     }
+        // }
+        
+        // if(typeof extInstance.getConfig !== 'function') {
+        //     logerror("Extension class does not have a getConfig() method.")
+        //     return
+        // }
+        // config = extInstance.getConfig()
+        // if(!config?.name) {
+        //     logerror("Extension does not provide a name.")
+        //     return
+        // }
+        // if(!config?.types) {
+        //     logerror("Extension does not provide any types.")
+        //     return
+        // }
 
         // Get all available commands:
         const commands = ['add', 'update', 'delete', 'list', 'generate']
-            .filter(m => typeof extModule.default.prototype[m] === 'function')
-            
-        logp(`Found extension ${config.name} with type(s) ${Object.keys(config.types).join(', ')} and command(s) ${commands.join(', ')}.`)
+            .filter(m => typeof constructorFunc.prototype[m] === 'function')
+ 
+        logp(`Found extension ${config.name} `+
+            `with type(s) ${Object.keys(config.types).join(', ')}`+
+            ` and command(s) ${commands.join(', ')}`+
+            (config.options ? ` and option(s) ${Object.keys(config.options).join(', ')}.` : '.')
+        )
 
         // Add extension to the blackbox.json file:
-        serverManager.bbDoc.extensions.push({
-            path: destPath,
+        this.serverManager.bbDoc.extensions.push({
             ...config,
-            commands
+            commands,
+            path: destPath
         })
-        serverManager.writeConfigJson()
-        // fs.writeFileSync("blackbox.json", JSON.stringify(bbConfig, null, 2))
+        this.serverManager.writeConfigJson()
         logem("Extension added from file "+this.config.file)
     }
 
@@ -128,13 +166,11 @@ export default class ExtensionManager {
     }
 
     async getManager(type: string): Promise<Extension | null> {
-        const serverManager = new ServerManager(this.config)
-        await serverManager.loadConfigJson()
-        if(!serverManager.bbDoc.extensions || serverManager.bbDoc.extensions.length <= 0) {
+        if(!this.serverManager.bbDoc.extensions || this.serverManager.bbDoc.extensions.length <= 0) {
             return null
         }
         
-        for(const extInfo of serverManager.bbDoc.extensions) {
+        for(const extInfo of this.serverManager.bbDoc.extensions) {
             if(Object.keys(extInfo.types).includes(type)) {
                 if(!fs.existsSync(extInfo.path)) { 
                     logerror("Extension file "+extInfo.path+" not found.")
@@ -146,7 +182,7 @@ export default class ExtensionManager {
                     return null
                 }
                 
-                const extInstance = new extModule.default()
+                const extInstance = new extModule.default(this.config, this.serverManager.bbDoc, this.serverManager.openapiDoc)
                 return extInstance
             }
         }
@@ -157,14 +193,12 @@ export default class ExtensionManager {
         indent = "", 
         format = defaultFormat
     ) {
-        const serverManager = new ServerManager(this.config)
-        await serverManager.loadConfigJson()
-        if(!serverManager.bbDoc.extensions || serverManager.bbDoc.extensions.length <= 0) {
+        if(!this.serverManager.bbDoc.extensions || this.serverManager.bbDoc.extensions.length <= 0) {
             return ""
         }
         
         const pairs = {} as {[key: string]: string}
-        serverManager.bbDoc.extensions
+        this.serverManager.bbDoc.extensions
             .forEach( (ext: ExtensionConfig) => Object.assign(pairs, ext.types) )
         
         return printKeyValuePairs(pairs)(indent, format)

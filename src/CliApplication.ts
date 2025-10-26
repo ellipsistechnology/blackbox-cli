@@ -30,7 +30,10 @@ export default class CliApplication {
 
 		logh1("\nTypes:")
 		logp(printTypes("\t", keyValueFormat))
-    const extManager = new ExtensionManager(this.options)
+    const serverManager = new ServerManager(this.options)
+    await serverManager.loadConfigJson()
+    await serverManager.loadOpenApiJson()
+    const extManager = new ExtensionManager(this.options, serverManager)
     const extensionTypes = await extManager.printExtensionTypes("\t", keyValueFormat)
     if(extensionTypes) {
       logp(extensionTypes)
@@ -94,14 +97,21 @@ export default class CliApplication {
 		}
 		else {
       const type = this.args[1]
-      const manager = await this.manager(type)
+      const serverManager = new ServerManager(this.options)
+      await serverManager.loadConfigJson()
+      await serverManager.loadOpenApiJson()
+
+      const manager = await this.manager(type, serverManager)
 
       if(!manager || typeof (<any>manager)[command] !== 'function') {
         logerror(`Operation ${command} is not applicable to type ${this.args[1]}.`)
       }
 
       try {
-        (<any>manager)[command](type) // call the relevant command on the manager
+        (<any>manager)[command](type); // call the relevant command on the manager
+        
+        serverManager.writeConfigJson();
+        serverManager.writeApiJson();
       } catch(err) {
         logerror(`Failed to ${command} ${type}`)
         console.error(err)
@@ -109,7 +119,7 @@ export default class CliApplication {
 		}
 	}
 
-  async manager(type: string) {
+  async manager(type: string, serverManager: ServerManager): Promise<any | null> {
     
     switch(type) {
       case 'server':
@@ -121,11 +131,12 @@ export default class CliApplication {
       case 'repository':
         return new RepositoryManager(this.options)
       case 'extension':
-        return new ExtensionManager(this.options)
+        return new ExtensionManager(this.options, serverManager)
       default:
         
         // Check for extensions to handle this type:
-        const extension = await new ExtensionManager(this.options).getManager(type)
+        const extension = await new ExtensionManager(this.options, serverManager).getManager(type)
+
         if(extension) {
           return extension
         }
