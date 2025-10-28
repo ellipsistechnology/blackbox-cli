@@ -60,6 +60,10 @@ call ../bb.bat list extension
 
 call ../bb.bat add test
 
+
+REM Add COM extension
+REM This will require connecting an Arduino with test firmware.
+
 call ../bb.bat add extension -f ../../../bb-com-extension/dist/index.js
 
 call  ../bb.bat add service -n comm -d string --access unique
@@ -67,5 +71,9 @@ call  ../bb.bat add service -n comm -d string --access unique
 call ../bb.bat generate service
 
 call ../bb.bat generate server
+
+call ../bb.bat add com-type -n com1 --baud 9600 --init ":HELP" --init-response "/TEST SERVICE/" -p "/comm"
+
+call  ../bb.bat add com-macro -p /comm --method get --commands "SYS:Q" --responses /Status:.*\\nCmd\ Complete/
 
 cd ..
