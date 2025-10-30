@@ -18,7 +18,7 @@ export const __dirname = dirname(__filename);
 const serverPort = 3000;
 const searchPaths = [
     path.join(__dirname, 'src/**/*').replaceAll('\\\\', '/'),
-    path.join(__dirname, 'gensrc/controllers/**/*').replaceAll('\\\\', '/')
+    path.join(__dirname, 'gensrc/**/*').replaceAll('\\\\', '/')
 ]
 
 // Load the openapi doc:

@@ -31,12 +31,14 @@ export default class CliApplication {
 		logh1("\nTypes:")
 		logp(printTypes("\t", keyValueFormat))
     const serverManager = new ServerManager(this.options)
-    await serverManager.loadConfigJson()
-    await serverManager.loadOpenApiJson()
-    const extManager = new ExtensionManager(this.options, serverManager)
-    const extensionTypes = await extManager.printExtensionTypes("\t", keyValueFormat)
-    if(extensionTypes) {
-      logp(extensionTypes)
+    if(serverManager.isInitialised()) {
+      await serverManager.loadConfigJson()
+      await serverManager.loadOpenApiJson()
+      const extManager = new ExtensionManager(this.options, serverManager)
+      const extensionTypes = await extManager.printExtensionTypes("\t", keyValueFormat)
+      if(extensionTypes) {
+        logp(extensionTypes)
+      }
     }
 
 		logh1("\nOptions:")
@@ -68,6 +70,17 @@ export default class CliApplication {
         return
       }
       if(!(<any>Object.keys(Types)).includes(this.args[1])) {
+        // Try extensions:
+        const type = this.args[1]
+        const serverManager = new ServerManager(this.options)
+        await serverManager.loadConfigJson()
+        await serverManager.loadOpenApiJson()
+        const extension = await new ExtensionManager(this.options, serverManager).getManager(type)
+        if(extension && typeof extension.generate === 'function') {
+          await extension.generate(type)
+          return
+        }
+
         logerror(`Generate is not applicable to type '${this.args[1]}'`)
         return
       }
@@ -105,6 +118,7 @@ export default class CliApplication {
 
       if(!manager || typeof (<any>manager)[command] !== 'function') {
         logerror(`Operation ${command} is not applicable to type ${this.args[1]}.`)
+        return
       }
 
       try {

@@ -35,6 +35,8 @@ function methodType(oasDoc: any, path: string, method: string, schemaToClass: { 
   }
   else if(schema['$ref']) {
     type = schemaToClass[schema['$ref']]
+  } else if(typeof schema.type === 'string') {
+    type = schema.type
   }
 
   if(type && schema.type === 'array') {
@@ -46,10 +48,10 @@ function methodType(oasDoc: any, path: string, method: string, schemaToClass: { 
   }
 }
 
-export default function (openapiDoc: any, {serviceName: name, methods}:TemplateMap):string {
+export default function (openapiDoc: any, {serviceName, methods}:TemplateMap):string {
 
-  const className = toCammelCase(name)
-  const classVarName = toCammelCase(name, false)
+  const className = toCammelCase(serviceName)
+  const classVarName = toCammelCase(serviceName, false)
   const schemaToClass = schemaToClassMap(openapiDoc)
 
   let imports = ''

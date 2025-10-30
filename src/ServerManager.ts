@@ -11,6 +11,10 @@ export default class ServerManager {
     public config: CliConfig
   ) {}
 
+  isInitialised(): boolean {
+    return fs.existsSync(CONFIG_FILENAME) && fs.existsSync(OPENAPI_FILENAME)
+  }
+
   async update() {
     try {
       // Update the OpenAPI document:

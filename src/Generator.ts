@@ -293,7 +293,7 @@ export default class Generator {
         ))
 
         const templateData = {
-          serviceName: path.substring(path.lastIndexOf('/')+1), // service name 
+          serviceName: path.substring(path.lastIndexOf('/')+1),
           methods: []
         } as ServiceTemplateMap
 

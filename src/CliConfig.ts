@@ -46,57 +46,29 @@ export default class CliConfig {
     
     // Add options from extensions:
     const serverManager = new ServerManager(this)
-    serverManager.loadConfigJsonSync()
-    serverManager.bbDoc.extensions.forEach((ext: any) => {
-      if(ext.options) {
-        Object.entries(ext.options).forEach(([option, description]) => {
-          program.option(option, <string>description)
-        })
-      }
-    })
+    if(serverManager.isInitialised()) {
+      serverManager.loadConfigJsonSync()
+      serverManager.bbDoc.extensions?.forEach((ext: any) => {
+        if(ext.options) {
+          Object.entries(ext.options).forEach(([option, description]) => {
+            program.option(option, <string>description)
+          })
+        }
+      })
+    }
     
+    // Parse the args:
     program.allowExcessArguments(true)
-    
     program.parse(args);
 
+    // Assign the options to the config:
     const opts = program.opts()
-
     Object.assign(this, opts)
-    
-    
-    // Object.keys(opts).forEach( (opt:string) => {
-    //   switch(opt) {
-    //   case 'name':
-    //     this.name = opts[opt]; break
-    //   case 'title':
-    //     this.title = opts[opt]; break
-    //   case 'desc':
-    //     this.description = opts[opt]; break
-    //   case 'file':
-    //     this.file = opts[opt]; break
-    //   case 'datatype':
-    //     this.datatype = opts[opt]; break
-    //   case 'path':
-    //     this.path = opts[opt]; break
-    //   case 'summary':
-    //     this.summary = opts[opt]; break
-    //   case 'methods':
-    //     this.methods = opts[opt]; break
-    //   case 'access':
-    //     this.access = opts[opt]; break
-    //   case 'identifier':
-    //     this.identifier = opts[opt]; break
-    //   case 'all':
-    //     this.all = opts[opt]; break
-    //   case 'dest':
-    //     this.dest = opts[opt]; break
-    //   case 'url':
-    //     this.url = opts[opt]; break
-    //   }
-    // })
 
-    if(opts.verbose)
+    // Setup verbose logging:
+    if(opts.verbose) {
       console.log(`Verbose logging enabled`)
+    }
     setVerboseLogging(opts.verbose)
 	}
 
