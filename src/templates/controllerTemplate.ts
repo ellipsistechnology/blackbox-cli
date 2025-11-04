@@ -27,8 +27,9 @@ export default function (
             // Note: The first time this is called it will not be for an object node, 
             // so the last node will always be the service name.
             serviceNames[fileName] = path.substring(path.lastIndexOf('/')+1)
-            controllerList[fileName] = `import { autowired, autowiredService } from "ellipsis-ioc";
-import { makeService, makeServiceList, makeUniqueService } from "../blackbox-utils.js";
+            controllerList[fileName] = `import { autowired, autowiredService } from "ellipsis-ioc"
+import { makeService, makeServiceList, makeUniqueService } from "../blackbox-utils.js"
+import { NotFound } from '../gensrc/HttpError.js'
 
 class ServiceWrapper {
     @autowiredService('${serviceNames[fileName]}')
@@ -58,21 +59,14 @@ const wrapper = new ServiceWrapper()
                 throw new Error(`No operationId found for ${method.toUpperCase()} for service ${path}.`)
             }
 
-            const functionCheck = `if(typeof wrapper.service.${operationId} !== 'function') {
-            console.error("Service function ${operationId} not found: "+
-                "Please implement function ${operationId} in a service class tagged with the @service('${serviceNames[fileName]}') decorator."
-            )
-            res.status(500).json({"error": "Service function ${operationId} not found."})
-            return
-        }
+            const functionCheck = (tab: string = '') => `if(typeof wrapper.service.${operationId} !== 'function') {
+        ${tab}    console.error("Service function ${operationId} not found: "+
+        ${tab}        "Please implement function ${operationId} in a service class tagged with the @service('${serviceNames[fileName]}') decorator."
+        ${tab}    )
+        ${tab}    next(new NotFound("Service function ${operationId} not found."))
+        ${tab}    return
+        ${tab}}
 `
-
-            const corsHeaders = ''/*`// Manually add the CORS headers.
-    // Required due to a bug in swagger-tools-oas3:
-    res.setHeader('Access-Control-Allow-Origin', '*')
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-`*/
 
             // Get for a service node (unique object or list of objects with identifier/index)
             // or an object node:
@@ -81,26 +75,27 @@ const wrapper = new ServiceWrapper()
                 const isObject = path.endsWith('}') || path.endsWith('}/') // ends with a path param
                 const hasSubpaths = Object.keys(openapiDoc.paths).some( p => p !== path && p.startsWith(path.endsWith('/') ? path : path + '/') )
                 controllerList[fileName] += `// Get the ${isUnique ? 'unique' : !isObject ? 'list of' : ''} object${isUnique || isObject ? '' : 's'} for '${path}':
-export function ${operationId}(req: any, res: any) {
-    ${corsHeaders}
-    const meta = req.query.meta
-    ${pathParamsDefinitions}
-    if(meta !== undefined) {
-        // Call the user specified metatdata function if it exists:
-        if(typeof wrapper.service.${operationId}Meta === 'function') { 
-          Promise.resolve(wrapper.service.${operationId}Meta( {${pathParamsList}} ))
-          .then(metadata => res.status(200).json(metadata))
-        } else {
-            ${   isUnique ? `res.status(200).json(makeUniqueService(req, wrapper.openapiDoc))` :
-              hasSubpaths ? `res.status(200).json(makeService${isObject ? 'List' : ''}(req, wrapper.openapiDoc))` :
-                            `res.status(404).json({"error": "Metadata is not available for this ${isObject ? 'object' : 'service'}."})`
+export function ${operationId}(req: any, res: any, next: any) {
+        const meta = req.query.meta
+        ${pathParamsDefinitions}
+        if(meta !== undefined) {
+            // Call the user specified metatdata function if it exists:
+            if(typeof wrapper.service.${operationId}Meta === 'function') { 
+                Promise.resolve(wrapper.service.${operationId}Meta( {${pathParamsList}} ))
+                .then(metadata => {res.status(200).json(metadata); next()})
+                .catch(err => next(err))
+            } else {
+                ${   isUnique ? `res.status(200).json(makeUniqueService(req, wrapper.openapiDoc))` :
+                hasSubpaths ? `res.status(200).json(makeService${isObject ? 'List' : ''}(req, wrapper.openapiDoc))` :
+                                `next(new NotFound("Metadata is not available for this ${isObject ? 'object' : 'service'}."))`
+                }
             }
+        } else {
+            ${functionCheck('    ')}
+            Promise.resolve(wrapper.service.${operationId}({${pathParamsList}}))
+            .then(list => {res.status(200).json(list); next()})
+            .catch(err => next(err))
         }
-    } else {
-        ${functionCheck}
-        Promise.resolve(wrapper.service.${operationId}({${pathParamsList}}))
-        .then(list => res.status(200).json(list))
-    }
 }
 
 `
@@ -110,12 +105,12 @@ export function ${operationId}(req: any, res: any) {
             // Delete for an object node:
             if(method === 'delete') {
                 controllerList[fileName] += `// Delete an existing object:
-export function ${operationId}(req: any, res: any) {
-    ${corsHeaders}
-    ${functionCheck}
-    ${pathParamsDefinitions}
-    wrapper.service.${operationId}({${pathParamsList}})
-    res.status(200).json({})
+export function ${operationId}(req: any, res: any, next: any) {
+        ${functionCheck('')}
+        ${pathParamsDefinitions}
+        Promise.resolve(wrapper.service.${operationId}({${pathParamsList}}))
+        .then(() => {res.status(200).json({}); next()})
+        .catch(err => next(err))
 }
     
 `
@@ -136,21 +131,23 @@ export function ${operationId}(req: any, res: any) {
                     throw new Error(`No x-bb-service configuration found for POST for service ${path}.`)
                 }
                 controllerList[fileName] += `// Create a new ${datatype} object:
-export function ${operationId}(req: any, res: any) {
-    ${corsHeaders}
-    ${functionCheck}
-    ${pathParamsDefinitions}
-    const data = wrapper.service.${operationId}({data: req.body, ${pathParamsList}})
-
-    ${bbConfig.access === 'unique' ?
-        'res.status(200).json(data)' : 
-    `// Check for id or index in body and return 500 if not present:
-    if(data.${bbConfig.access === 'id' ? (bbConfig.identifier || 'id') : 'index' } === undefined) {
-        res.status(500).json({"error": "Service did not return the ${bbConfig.access === 'id' ? (bbConfig.identifier || 'id') : 'index' } of the created object."})
-    } else {
-        res.status(200).json(data)
-    }`
-    }
+export function ${operationId}(req: any, res: any, next: any) {
+        ${functionCheck('')}
+        ${pathParamsDefinitions}
+        Promise.resolve(wrapper.service.${operationId}({data: req.body, ${pathParamsList}}))
+        .then(data => {
+            ${bbConfig.access === 'unique' ?
+                'res.status(200).json(data)' : 
+            `// Check for id or index in body and return 500 if not present:
+            if(data.${bbConfig.access === 'id' ? (bbConfig.identifier || 'id') : 'index' } === undefined) {
+                next(new InternalServerError("Service did not return the ${bbConfig.access === 'id' ? (bbConfig.identifier || 'id') : 'index' } of the created object."))
+            } else {
+                res.status(200).json(data)
+            }`
+            }
+            next()
+        })
+        .catch(err => next(err))
 }
 
 `
@@ -160,12 +157,12 @@ export function ${operationId}(req: any, res: any) {
             // Put for an object node:
             if(method === 'put') {
                 controllerList[fileName] += `// Replace an existing ${datatype} object:
-export function ${operationId}(req: any, res: any) {
-    ${corsHeaders}
-    ${functionCheck}
-    ${pathParamsDefinitions}
-    wrapper.service.${operationId}({data: req.body, ${pathParamsList}})
-    res.status(200).json({})
+export function ${operationId}(req: any, res: any, ext: any) {
+        ${functionCheck('')}
+        ${pathParamsDefinitions}
+        Promise.resolve(wrapper.service.${operationId}({data: req.body, ${pathParamsList}}))
+        .then(data => {res.status(200).json({}); next()})
+        .catch(err => next(err))
 }
 
 `
@@ -175,12 +172,12 @@ export function ${operationId}(req: any, res: any) {
             // Patch for an object node:
             if(method === 'patch') {
                 controllerList[fileName] += `// Update an existing ${datatype} object:
-export function ${operationId}(req: any, res: any) {
-    ${corsHeaders}
-    ${functionCheck}
-    ${pathParamsDefinitions}
-    wrapper.service.${operationId}({data: req.body, ${pathParamsList}})
-    res.status(200).json({})
+export function ${operationId}(req: any, res: any, next: any) {
+        ${functionCheck('')}
+        ${pathParamsDefinitions}
+        Promise.resolve(wrapper.service.${operationId}({data: req.body, ${pathParamsList}}))
+        .then(data => {res.status(200).json({}); next()})
+        .catch(err => next(err))
 }
 
 `

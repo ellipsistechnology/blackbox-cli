@@ -25,6 +25,7 @@ import ServerManager from "./ServerManager.js"
 import { TemplateMap as ServiceTemplateMap } from "./templates/serviceTemplate.js"
 import { TemplateMap as DatatypeTemplateMap } from "./templates/datatypeTemplate.js"
 import controllerTemplate from "./templates/controllerTemplate.js"
+import HttpErrorTemplate from "./templates/HttpErrorTemplate.js"
 
 // const {exec} = require('child_process')
 // const {resolve} = require('path')
@@ -356,6 +357,10 @@ export default class Generator {
     if(!fs.existsSync('.gitignore')) {
       fs.writeFileSync('.gitignore', gitignoreTemplate())
       logp(`Created .gitignore`)
+    }
+    if(!fs.existsSync(`${GENSRC_DIR}/HttpError.ts`)) {
+      fs.writeFileSync(`./${GENSRC_DIR}/HttpError.ts`, HttpErrorTemplate())
+      logp(`Created ./${GENSRC_DIR}/HttpError.ts`)
     }
 
     // Create default controllers and utils if they don't exist.
