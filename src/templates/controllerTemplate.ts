@@ -88,8 +88,8 @@ export function ${operationId}(req: any, res: any) {
     if(meta !== undefined) {
         // Call the user specified metatdata function if it exists:
         if(typeof wrapper.service.${operationId}Meta === 'function') { 
-          const metadata = wrapper.service.${operationId}Meta( {${pathParamsList}} )
-          res.status(200).json(metadata)
+          Promise.resolve(wrapper.service.${operationId}Meta( {${pathParamsList}} ))
+          .then(metadata => res.status(200).json(metadata))
         } else {
             ${   isUnique ? `res.status(200).json(makeUniqueService(req, wrapper.openapiDoc))` :
               hasSubpaths ? `res.status(200).json(makeService${isObject ? 'List' : ''}(req, wrapper.openapiDoc))` :
@@ -98,7 +98,8 @@ export function ${operationId}(req: any, res: any) {
         }
     } else {
         ${functionCheck}
-        res.status(200).json(wrapper.service.${operationId}({${pathParamsList}}))
+        Promise.resolve(wrapper.service.${operationId}({${pathParamsList}}))
+        .then(list => res.status(200).json(list))
     }
 }
 

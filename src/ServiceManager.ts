@@ -324,6 +324,7 @@ export default class ServiceManager {
     this.apiManager.openapiDoc.paths[path].post = servicePost({
       operationId: this.makeOperationId('post'),
       datatype: this.config.datatype!,
+      pathParams: extractPathParams(path),
       responseSchema: 
         this.config.access === 'index'   ? 'index-response' : 
         this.config.access === 'id'      ? idResponseSchemaName :

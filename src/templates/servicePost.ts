@@ -1,11 +1,12 @@
 import { jsonTypes, makeContentSchema } from '../utils.js'
 
 export default function (
-    {operationId, datatype, responseSchema} :
+    {operationId, datatype, responseSchema, pathParams} :
     {
         operationId: string,
         datatype: string,
-        responseSchema: string
+        responseSchema: string,
+        pathParams?: string[]
     }
 ) {
     const postDefinition = {
@@ -22,8 +23,17 @@ export default function (
                 "description": datatype+" successfully created."
             } as any
         }
+    } as any
+
+    // Add id/index parameter if needed:
+    if(pathParams) {
+        postDefinition.parameters = []
+        pathParams.forEach(p => {
+            postDefinition.parameters.push({"$ref": "#/components/parameters/path-"+p})
+        })
     }
 
+    // Add response schema:
     if(responseSchema) {
         postDefinition.responses['200'].content = {
             "application/json": { "schema": makeContentSchema(responseSchema) }
