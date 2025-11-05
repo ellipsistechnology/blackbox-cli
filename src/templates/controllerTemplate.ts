@@ -29,7 +29,7 @@ export default function (
             serviceNames[fileName] = path.substring(path.lastIndexOf('/')+1)
             controllerList[fileName] = `import { autowired, autowiredService } from "ellipsis-ioc"
 import { makeService, makeServiceList, makeUniqueService } from "../blackbox-utils.js"
-import { NotFound } from '../gensrc/HttpError.js'
+import { NotFound } from '../HttpError.js'
 
 class ServiceWrapper {
     @autowiredService('${serviceNames[fileName]}')

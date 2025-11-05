@@ -8,7 +8,7 @@ export default class CliConfig {
   // Common options:
   name?:string
   title?:string
-  description?:string
+  desc?:string
   datatype?:string
   methods:string = "get,post,put,patch,delete"
   all:boolean = false

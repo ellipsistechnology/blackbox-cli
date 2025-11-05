@@ -165,6 +165,7 @@ export default class Generator {
                 schema.properties[name]['$ref'] ? schemaToClass[schema.properties[name]['$ref']] :
                 schema.properties[name].type === 'array' && schema.properties[name].items && schema.properties[name].items['$ref'] ? schemaToClass[schema.properties[name].items['$ref']]+'[]' :
                 schema.properties[name].type === 'array' && schema.properties[name].items && (<any>jsonTypes).includes(schema.properties[name].items.type) ? schema.properties[name].items.type+'[]' :
+                schema.properties[name].type === 'string' && schema.properties[name].enum ? parseEnumValues(schema.properties[name].enum) :
                 (<any>jsonTypes).includes(schema.properties[name].type) ? schema.properties[name].type :
                 Array.isArray(schema.properties[name].oneOf) ? (
                   schema.properties[name].oneOf
@@ -390,3 +391,10 @@ export default class Generator {
     logem(`Run ${code('npm run build')} to build for deployment.`)
   }
 }
+
+function parseEnumValues(enumArray: string[]): string {
+  return enumArray.reduce( (accumulator, currentValue, currentIndex) => {
+    return accumulator + (currentIndex > 0 ? ' | ' : '') + `'${currentValue}'`
+  }, '')
+}
+

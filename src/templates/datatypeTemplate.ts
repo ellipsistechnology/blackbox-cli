@@ -19,6 +19,7 @@ export default function ({name, properties, additionalProperties, parentClasses,
   let imports = ''
   new Set(properties // use a set to remove duplicates
     .map(property => property.type) // extract types from properties
+    .filter(type => !type.startsWith("'")) // remove string literal types including enums
     .map(type => type.endsWith('[]')?type.substring(0, type.length-2):type) // extract type from array
     .reduce((classes, type) => classes.concat(type.split('&')), <string[]>[]) // split Type1&Type2
     .reduce((classes, type) => classes.concat(type.split('|')), <string[]>[]) // split Type1|Type2

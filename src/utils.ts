@@ -9,7 +9,7 @@ import https from "node:https"
  * @returns The CamelCased string.
  */
 export function toCammelCase(name: string, startUpper: boolean = true) {
-  if(jsonTypes.includes(name) || name.endsWith('[]') && jsonTypes.includes(name.substring(0, name.length-2))) {
+  if(jsonTypes.includes(name) || name.endsWith('[]') && jsonTypes.includes(name.substring(0, name.length-2)) || name.startsWith("'")) {
     return name
   } else {
     const cc = name.replace(/([-_][a-z])/ig, ($1) => {

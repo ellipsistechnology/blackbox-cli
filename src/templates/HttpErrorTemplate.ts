@@ -36,7 +36,7 @@ export class PaymentRequired extends HttpError
     description: string
     constructor(message: string) {
         super(402, message)
-        this.description = 'Reserved for future use. The original intention was that this code might be used as part of some form of digital cash or micropayment scheme, as proposed, for example, by GNU Taler,[11] but that has not yet happened, and this code is not widely used. Google Developers API uses this status if a particular developer has exceeded the daily limit on requests.[12] Sipgate uses this code if an account does not have sufficient funds to start a call.[13] Shopify uses this code when the store has not paid their fees and is temporarily disabled.[14] Stripe uses this code for failed payments where parameters were correct, for example blocked fraudulent payments.[15]'
+        this.description = 'Reserved for future use. The original intention was that this code might be used as part of some form of digital cash or micropayment scheme, as proposed, for example, by GNU Taler, but that has not yet happened, and this code is not widely used. Google Developers API uses this status if a particular developer has exceeded the daily limit on requests. Sipgate uses this code if an account does not have sufficient funds to start a call. Shopify uses this code when the store has not paid their fees and is temporarily disabled. Stripe uses this code for failed payments where parameters were correct, for example blocked fraudulent payments.'
     }
 }
 
@@ -99,7 +99,7 @@ export class Conflict extends HttpError
     description: string
     constructor(message: string) {
         super(409, message)
-        this.description = 'Indicates that the request could not be processed because of conflict in the current state of the resource, such as an edit conflict between multiple simultaneous updates.[16]'
+        this.description = 'Indicates that the request could not be processed because of conflict in the current state of the resource, such as an edit conflict between multiple simultaneous updates.'
     }
 }
 
@@ -135,7 +135,7 @@ export class PayloadTooLarge extends HttpError
     description: string
     constructor(message: string) {
         super(413, message)
-        this.description = 'The request is larger than the server is willing or able to process. Previously called "Request Entity Too Large".[17]: §10.4.14 '
+        this.description = 'The request is larger than the server is willing or able to process. Previously called "Request Entity Too Large".: §10.4.14 '
     }
 }
 
@@ -144,7 +144,7 @@ export class URITooLong extends HttpError
     description: string
     constructor(message: string) {
         super(414, message)
-        this.description = 'The URI provided was too long for the server to process. Often the result of too much data being encoded as a query-string of a GET request, in which case it should be converted to a POST request. Called "Request-URI Too Long" previously.[17]: §10.4.15 '
+        this.description = 'The URI provided was too long for the server to process. Often the result of too much data being encoded as a query-string of a GET request, in which case it should be converted to a POST request. Called "Request-URI Too Long" previously.'
     }
 }
 
@@ -162,7 +162,7 @@ export class RangeNotSatisfiable extends HttpError
     description: string
     constructor(message: string) {
         super(416, message)
-        this.description = 'The client has asked for a portion of the file (byte serving), but the server cannot supply that portion. For example, if the client asked for a part of the file that lies beyond the end of the file. Called "Requested Range Not Satisfiable" previously.[17]: §10.4.17 '
+        this.description = 'The client has asked for a portion of the file (byte serving), but the server cannot supply that portion. For example, if the client asked for a part of the file that lies beyond the end of the file. Called "Requested Range Not Satisfiable" previously.'
     }
 }
 
@@ -171,7 +171,7 @@ export class ExpectationFailed extends HttpError
     description: string
     constructor(message: string) {
         super(417, message)
-        this.description = 'The server cannot meet the requirements of the Expect request-header field.[18]'
+        this.description = 'The server cannot meet the requirements of the Expect request-header field.'
     }
 }
 
@@ -180,7 +180,7 @@ export class ImATeapot extends HttpError
     description: string
     constructor(message: string) {
         super(418, message)
-        this.description = 'This code was defined in 1998 as one of the traditional IETF April Fools\' jokes, in RFC 2324, Hyper Text Coffee Pot Control Protocol, and is not expected to be implemented by actual HTTP servers. The RFC specifies this code should be returned by teapots requested to brew coffee.[19] This HTTP status is used as an Easter egg in some websites, such as Google.com\'s "I\'m a teapot" easter egg.[20][21][22] Sometimes, this status code is also used as a response to a blocked request, instead of the more appropriate 403 Forbidden.[23][24] '
+        this.description = 'This code was defined in 1998 as one of the traditional IETF April Fools\\' jokes, in RFC 2324, Hyper Text Coffee Pot Control Protocol, and is not expected to be implemented by actual HTTP servers. The RFC specifies this code should be returned by teapots requested to brew coffee. This HTTP status is used as an Easter egg in some websites, such as Google.com\\'s "I\\'m a teapot" easter egg. Sometimes, this status code is also used as a response to a blocked request, instead of the more appropriate 403 Forbidden. '
     }
 }
 
@@ -198,7 +198,7 @@ export class UnprocessableContent extends HttpError
     description: string
     constructor(message: string) {
         super(422, message)
-        this.description = 'The request was well-formed (i.e., syntactically correct) but could not be processed.[2]: §15.5.21 '
+        this.description = 'The request was well-formed (i.e., syntactically correct) but could not be processed.'
     }
 }
 
@@ -216,7 +216,7 @@ export class FailedDependency extends HttpError
     description: string
     constructor(message: string) {
         super(424, message)
-        this.description = 'The request failed because it depended on another request and that request failed (e.g., a PROPPATCH).[7]'
+        this.description = 'The request failed because it depended on another request and that request failed (e.g., a PROPPATCH).'
     }
 }
 
@@ -243,7 +243,7 @@ export class PreconditionRequired extends HttpError
     description: string
     constructor(message: string) {
         super(428, message)
-        this.description = 'The origin server requires the request to be conditional. Intended to prevent the \'lost update\' problem, where a client GETs a resource\'s state, modifies it, and PUTs it back to the server, when meanwhile a third party has modified the state on the server, leading to a conflict.[25]'
+        this.description = 'The origin server requires the request to be conditional. Intended to prevent the \\'lost update\\' problem, where a client GETs a resource\\'s state, modifies it, and PUTs it back to the server, when meanwhile a third party has modified the state on the server, leading to a conflict.'
     }
 }
 
@@ -252,7 +252,7 @@ export class TooManyRequests extends HttpError
     description: string
     constructor(message: string) {
         super(429, message)
-        this.description = 'The user has sent too many requests in a given amount of time. Intended for use with rate-limiting schemes.[25]'
+        this.description = 'The user has sent too many requests in a given amount of time. Intended for use with rate-limiting schemes.'
     }
 }
 
@@ -261,7 +261,7 @@ export class RequestHeaderFieldsTooLarge extends HttpError
     description: string
     constructor(message: string) {
         super(431, message)
-        this.description = 'The server is unwilling to process the request because either an individual header field, or all the header fields collectively, are too large.[25]'
+        this.description = 'The server is unwilling to process the request because either an individual header field, or all the header fields collectively, are too large.'
     }
 }
 
@@ -270,7 +270,7 @@ export class UnavailableForLegalReasons extends HttpError
     description: string
     constructor(message: string) {
         super(451, message)
-        this.description = 'A server operator has received a legal demand to deny access to a resource or to a set of resources that includes the requested resource.[26] The code 451 was chosen as a reference to the novel Fahrenheit 451.[27]'
+        this.description = 'A server operator has received a legal demand to deny access to a resource or to a set of resources that includes the requested resource. The code 451 was chosen as a reference to the novel Fahrenheit 451.'
     }
 }
 

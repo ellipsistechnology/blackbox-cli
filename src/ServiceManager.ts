@@ -71,7 +71,7 @@ export default class ServiceManager {
           pathParams: extractPathParams(path)
         })
         this.apiManager.openapiDoc.paths[path].summary = this.config.summary || `Operations on ${this.config.name}`
-        this.apiManager.openapiDoc.paths[path].description = this.config.description || (`This service allows ${this.config.access === 'unique' ? 'access to a unique' : 'management of'} ${this.config.datatype} object${this.config.access === 'unique' ? '' : 's'}.`)
+        this.apiManager.openapiDoc.paths[path].description = this.config.desc || (`This service allows ${this.config.access === 'unique' ? 'access to a unique' : 'management of'} ${this.config.datatype} object${this.config.access === 'unique' ? '' : 's'}.`)
         logp(`Added path ${code(path)}`)
       }
 
