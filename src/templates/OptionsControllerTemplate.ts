@@ -18,7 +18,7 @@ ${Object.keys(openapiDoc.paths).map( (path: string) => {
     // Manually add the CORS headers.
     // Required due to a bug in swagger-tools-oas3:
     res.setHeader('Access-Control-Allow-Origin', '*')
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS, PUT, DELETE')
     res.setHeader('Access-Control-Allow-Headers', 'Allow, Content-Type, Authorization')
     res.setHeader('Access-Control-Expose-Headers', 'Allow, Content-Type, Authorization')
     
