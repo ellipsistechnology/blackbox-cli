@@ -23,7 +23,7 @@ ${Object.keys(openapiDoc.paths).map( (path: string) => {
     res.setHeader('Access-Control-Expose-Headers', 'Allow, Content-Type, Authorization')
     
     const opts = Object.keys(wrapper.openapiDoc.paths[req.openapi.openApiRoute])
-        .filter(method => !method.startsWith('x-'))
+        .filter(method => ['get', 'post', 'put', 'patch', 'delete', 'options'].includes(method.toLowerCase()))
     res.status(200).set("Allow", opts).json({})
 }`
 }).join('\n\n')}
