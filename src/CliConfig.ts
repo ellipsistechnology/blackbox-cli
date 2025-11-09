@@ -10,7 +10,7 @@ export default class CliConfig {
   title?:string
   desc?:string
   datatype?:string
-  methods:string = "get,post,put,patch,delete"
+  methods?:string
   all:boolean = false
   summary?:string
   file?:string
@@ -18,8 +18,9 @@ export default class CliConfig {
   url?:string
   dest?:string
   sourceData:string | undefined
-  access?: 'unique' | 'id' | 'index' = 'id'
+  access?: 'unique' | 'id' | 'index'
   identifier?: string
+  metadata?:any
 
   // Additional options from extensions:
   [opt: string]: any
@@ -43,6 +44,7 @@ export default class CliConfig {
       .option('--dest <dest>', "Destination path for generated files.")
     	.option('--summary <summary>', "Summary for a service.")
       .option('-v, --verbose', "Display verbose output.")
+      .option('--meta <metadata>', "Static metadata for a service in JSON format.")
     
     // Add options from extensions:
     const serverManager = new ServerManager(this)
@@ -64,6 +66,11 @@ export default class CliConfig {
     // Assign the options to the config:
     const opts = program.opts()
     Object.assign(this, opts)
+
+    // Parse the metadata JSON if provided:
+    if(this.meta) {
+      this.metadata = JSON.parse(this.meta as unknown as string)
+    }
 
     // Setup verbose logging:
     if(opts.verbose) {
@@ -95,7 +102,7 @@ export default class CliConfig {
   }
 
   methodsSet():string[] {
-		return this.methods.split(",")
+		return this.methods ? this.methods.split(",") : ["get","post","put","patch","delete"]
 	}
 
   /**

@@ -1,0 +1,9 @@
+{
+    "exec": "tsc",
+    "ext": "ts,json",
+    "ignore": [
+        "dist/*",
+        "node_modules/*",
+        "test/*"
+    ]
+}

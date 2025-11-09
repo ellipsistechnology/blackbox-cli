@@ -7,7 +7,7 @@
   "scripts": {
     "test": "npm run clean && npm run build && cd test && ./test.sh",
     "dev": "node --loader ts-node/esm ./index.ts",
-    "dev-build": "nodemon --watch index.ts --watch src/CliConfig.ts --watch src/ExtensionManager.ts --watch src/CliApplication.ts --exec tsc",
+    "dev-build": "nodemon",
     "start": "node ./dist/index.js",
     "build": "tsc"
   },

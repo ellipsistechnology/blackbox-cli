@@ -147,7 +147,8 @@ export function makeService(req: any, openapiDoc: any): Service | Metadata {
             schema
         },
         access: bbService.access,
-        identifier: bbService.identifier
+        identifier: bbService.identifier,
+        ...(bbService.metadata || {})
     };
 }
 

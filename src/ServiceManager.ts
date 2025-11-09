@@ -60,8 +60,7 @@ export default class ServiceManager {
       if(this.apiManager.openapiDoc.paths[path]) {
         logerror("A service already exists at path "+path)
         return
-      }
-      else {
+      } else {
         this.apiManager.openapiDoc.paths[path] = serviceGet({
           operationId: this.makeOperationId('get', this.config.access === 'unique' ? '' : 'List'),
           serviceName: toCammelCase(this.config.name!, true) + (this.config.access === 'unique' ? '' : 'List'),
@@ -74,6 +73,9 @@ export default class ServiceManager {
         this.apiManager.openapiDoc.paths[path].description = this.config.desc || (`This service allows ${this.config.access === 'unique' ? 'access to a unique' : 'management of'} ${this.config.datatype} object${this.config.access === 'unique' ? '' : 's'}.`)
         logp(`Added path ${code(path)}`)
       }
+
+      // Add metadata if provided:
+      this.apiManager.openapiDoc.paths[path]['x-bb-service'].metadata = this.config.metadata
 
   		// TODO: Auto load datatypes from a repository if not found locally.
 
@@ -171,6 +173,15 @@ export default class ServiceManager {
     if(!path) {
       logerror(`Path ${this.config.path} not found.`)
       return
+    }
+
+    // Add/update metadata if provided:
+    if(this.config.metadata && this.apiManager.openapiDoc.paths[path]['x-bb-service']?.metadata) {
+      Object.assign(this.apiManager.openapiDoc.paths[path]['x-bb-service'].metadata, this.config.metadata)
+      logp(`Updated metadata for service at path ${code(path)}`)
+    } else if(this.config.metadata) {
+      this.apiManager.openapiDoc.paths[path]['x-bb-service'].metadata = this.config.metadata
+      logp(`Added metadata for service at path ${code(path)}`)
     }
 
     // Set the name from the path:
