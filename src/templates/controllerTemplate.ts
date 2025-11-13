@@ -29,7 +29,7 @@ export default function (
             serviceNames[fileName] = path.substring(path.lastIndexOf('/')+1)
             controllerList[fileName] = `import { autowired, autowiredService } from "ellipsis-ioc"
 import { makeService, makeServiceList, makeUniqueService } from "../blackbox-utils.js"
-import { NotFound } from '../HttpError.js'
+import { NotFound, InternalServerError } from '../HttpError.js'
 
 class ServiceWrapper {
     @autowiredService('${serviceNames[fileName]}')
@@ -47,7 +47,7 @@ const wrapper = new ServiceWrapper()
         // For each operation in the path, add a controller function:
         Object.keys(pathItem).forEach( (method) => {
             // Skip options (handled by OptionsController), head and trace (not supported), and non-method nodes:
-            if(method === 'options' || method === 'head' || method === 'trace' || method === 'x-bb-service' || method === 'summary' || method === 'description') {
+            if(['get','post','put','patch','delete'].indexOf(method) === -1) {
                 return
             }
 
@@ -157,7 +157,7 @@ export function ${operationId}(req: any, res: any, next: any) {
             // Put for an object node:
             if(method === 'put') {
                 controllerList[fileName] += `// Replace an existing ${datatype} object:
-export function ${operationId}(req: any, res: any, ext: any) {
+export function ${operationId}(req: any, res: any, next: any) {
         ${functionCheck('')}
         ${pathParamsDefinitions}
         Promise.resolve(wrapper.service.${operationId}({data: req.body, ${pathParamsList}}))
