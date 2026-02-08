@@ -1,3 +1,4 @@
+import { kebab2Camel } from "../utils.js"
 import { jsonTypes, reservedClasses, reservedTypes, schemaToClassMap, toCammelCase } from '../utils.js'
 
 export interface TemplateMap {
@@ -10,7 +11,7 @@ export interface TemplateMap {
 }
 
 function methodType(oasDoc: any, path: string, method: string, schemaToClass: { [key:string]: string }): string {
-  // If there is no response content then default to 'any':
+  // If there is no response content then default to 'void':
   if(!oasDoc.paths[path][method].responses?.['200']?.content) {    
     return 'void'
   }
@@ -33,6 +34,16 @@ function methodType(oasDoc: any, path: string, method: string, schemaToClass: { 
   else if(schema.type === 'array' && schema.items && schema.items['$ref']) {
     type = schemaToClass[schema.items['$ref']]
   }
+  else if(schema.type === 'array' && schema.items && typeof ['string', 'number', 'boolean'].includes(schema.items.type)) {
+    type = schema.items.type
+  }
+  else if(schema.type === 'array' && schema.items) {
+    if(schema.items.type === 'integer') {
+      type = 'number'
+    } else {
+      type = 'any'
+    }
+  }
   else if(schema['$ref']) {
     type = schemaToClass[schema['$ref']]
   } else if(typeof schema.type === 'string') {
@@ -51,15 +62,15 @@ function methodType(oasDoc: any, path: string, method: string, schemaToClass: { 
 export default function (openapiDoc: any, {serviceName, methods}:TemplateMap):string {
 
   const className = toCammelCase(serviceName)
-  const classVarName = toCammelCase(serviceName, false)
+  // const classVarName = toCammelCase(serviceName, false)
   const schemaToClass = schemaToClassMap(openapiDoc)
 
   let imports = ''
   new Set(methods // use a set to remove duplicates
     .map(method => methodType(openapiDoc, method.path, method.method, schemaToClass)) // extract types from methods
     .filter(type => type) // remove empty - shouldn't happen???
+    .map((type:string) => type.endsWith('[]') ? type.substring(0, type.length-2) : type) // remove array brackets for import statements
     .filter(type => !jsonTypes.includes(type)) // remove primitives
-    .map((type:string) => type.endsWith('[]') ? type.substring(0, type.length-2) : type)
     .reduce((classes, type) => classes.concat(type.split('&')), <string[]>[]) // split Type1&Type2
     .reduce((classes, type) => classes.concat(type.split('|')), <string[]>[]) // split Type1|Type2
   ).forEach(type => imports += `import ${type} from '${reservedClasses.includes(type) ? '../gensrc/' : './'}${type}.js'\n`)
@@ -67,7 +78,7 @@ export default function (openapiDoc: any, {serviceName, methods}:TemplateMap):st
   return `import {serviceClass, autowired} from 'ellipsis-ioc'
 ${imports}
 
-@serviceClass('${classVarName}')
+@serviceClass('${serviceName}')
 export class ${className}Service {
 
   @autowired('openapi-doc')
@@ -76,7 +87,7 @@ export class ${className}Service {
   constructor() {
   }
   ${methods.map( method => {
-    const pathParams = (method.path.match(/{(.*?)}/g) || []).map( (p) => p.substring(1, p.length-1) )
+    const pathParams = (method.path.match(/{(.*?)}/g) || []).map( (p) => kebab2Camel(p.substring(1, p.length-1), false) )
     if(['post', 'put', 'patch'].includes(method.method)) {
       pathParams.push('data')
     }

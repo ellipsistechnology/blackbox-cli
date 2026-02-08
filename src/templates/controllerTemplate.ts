@@ -1,9 +1,11 @@
+import { kebab2Camel } from "../utils.js"
+
 export default function (
     openapiDoc: any
 ): {[key: string]: string} 
 {
     const controllerList:{
-        [key: string]: string
+        [fileName: string]: string
     } = {}
 
     const serviceNames: {[key: string]: string} = {}
@@ -13,13 +15,12 @@ export default function (
         if(path === '/') return
 
         // Get path params:
-        const pathParams = (path.match(/{(.*?)}/g) || []).map( (p) => p.substring(1, p.length-1) )
+        const pathParams = (path.match(/{(.*?)}/g) || []).map( (p) => kebab2Camel(p.substring(1, p.length-1), false) )
         const pathParamsDefinitions = pathParams.map(param => `const ${param} = req.openapi.pathParams['${param}']`).join('\n    ')
         const pathParamsList = pathParams.join(', ')
-        const fileName = path.split('/').filter(p => p && !p.startsWith('{')).join('_') + 'Controller.ts'
+        const fileName = path.split('/').filter(p => p && !p.startsWith('{')).map(token => kebab2Camel(token)).join('_') + 'Controller.ts'
         const pathItem = openapiDoc.paths[path]
         const bbConfig = pathItem['x-bb-service'] as {access?: string, identifier?: string} | undefined
-        
 
         // Create the common controller code for the service:
         if(!controllerList[fileName]) {

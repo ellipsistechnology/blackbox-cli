@@ -29,6 +29,19 @@ export function toCammelCase(name: string, startUpper: boolean = true) {
 }
 
 /**
+ * Convert a kebab-case string to camelCase or PascalCase.
+ * @param str 
+ * @param capitalizeFirst 
+ * @returns 
+ */
+export function kebab2Camel(str: string, capitalizeFirst: boolean = true): string {
+    if(capitalizeFirst) {
+        str = str.charAt(0).toUpperCase() + str.slice(1)
+    }
+    return str.replace(/-([a-z])/g, (_, char) => char.toUpperCase())
+}
+
+/**
  * Create an OpenAPI content schema for a given datatype using either
  * a native type or a $ref to a specified type.
  * @param datatype 
