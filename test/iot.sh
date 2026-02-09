@@ -1,8 +1,8 @@
 echo
 echo Creating IoT test service...
 
-mkdir iot
-cd iot
+mkdir tmp
+cd tmp
 
 node ../../dist/index.js init \
     --name iot \
@@ -101,6 +101,31 @@ node ../../dist/index.js add service \
 node ../../dist/index.js generate service
 node ../../dist/index.js generate server
 
+
 echo
-echo Testing complete.
+echo Installing dependencies...
+npm i
+
+
+echo
+echo Setting up test system in generated server...
+
+npm i jest supertest @types/jest @types/supertest --save-dev
+
+mkdir src/test
+cp ../e2e._test_.ts ./src/test/e2e.test.ts
+cp ../jest.config.cjs ./jest.config.cjs
+
+# add test script to package.json
+node -e "let pkg=require('./package.json'); pkg.scripts.test='jest'; require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2));"
+
+
+echo
+echo Building server...
+
+npm run build
+
+
+echo
+echo Test server generation complete.
 cd ..

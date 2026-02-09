@@ -5,7 +5,8 @@
   "type": "module",
   "main": "src/index.ts",
   "scripts": {
-    "test": "npm run clean && npm run build && cd test && ./test.sh",
+    "test-old": "npm run clean && npm run build && cd test && ./test.sh",
+    "test": "jest",
     "dev": "node --loader ts-node/esm ./index.ts",
     "dev-build": "nodemon",
     "start": "node ./dist/index.js",
@@ -27,8 +28,9 @@
     "readline-sync": "^1.4.10"
   },
   "devDependencies": {
-    "@types/node": "^24.7.0",
+    "@types/node": "^24.10.12",
     "nodemon": "^3.1.10",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }

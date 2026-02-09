@@ -20,6 +20,9 @@ const searchPaths = [
     path.join(__dirname, 'src/**/*').replaceAll('\\\\', '/'),
     path.join(__dirname, 'gensrc/**/*').replaceAll('\\\\', '/')
 ]
+const excludePaths = [
+    path.join(__dirname, 'src/**/*.test.ts').replaceAll('\\\\', '/'),
+]
 
 // Load the openapi doc:
 const openapiDocPath = path.join(__dirname, './openapi.json')
@@ -38,8 +41,13 @@ class _InitIoc {
     async init() {
 
         // Load all source files to ensure annotations are read:
+        const excludes = excludePaths.reduce((acc, exclude) => {
+            acc.push(...fs.globSync(exclude))
+            return acc
+        }, [] as string[])
         searchPaths.forEach(path => {
-            loadSrcFiles(path)
+            const files =  fs.globSync(path).filter(file => !excludes.includes(file))
+            files.forEach(file => loadSrcFiles(file, true) )
         })
 
         // Load controllers dynamically:
