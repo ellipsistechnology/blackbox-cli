@@ -26,7 +26,8 @@ const excludePaths = [
 // Load the openapi doc:
 const openapiDocPath = path.join(__dirname, './openapi.json')
 const openapiDoc = JSON.parse(fs.readFileSync(openapiDocPath, 'utf8'))
-let app: Express.Application
+
+let app: Express.Application | null = null
 
 export class InitServer {
     openapiDoc: any
@@ -66,11 +67,11 @@ export class InitServer {
                 exposedHeaders: 'Allow, Content-Type, Authorization',
                 preflightContinue: true
             }
-        } as any
+        } as any; 
 
         // Initialize the Express app:
-        const expressAppConfig = oas3Tools.expressAppConfig(openapiDocPath, options)
-        app = expressAppConfig.getApp()
+        const expressAppConfig = oas3Tools.expressAppConfig(openapiDocPath, options);
+        app = expressAppConfig.getApp();
 
         // Start the HTTP server:
         if (startServer) {

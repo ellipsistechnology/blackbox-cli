@@ -1,6 +1,6 @@
 import { SerialPort } from 'serialport';
-import { ComMacro } from './ComMacro';
-import { ComType } from './ComType';
+import { ComMacro } from './ComMacro.js';
+import { ComType } from './ComType.js';
 
 export class ComPort {
   private port: SerialPort | null = null;

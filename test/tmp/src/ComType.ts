@@ -1,4 +1,4 @@
-import { ComMacro } from './ComMacro';
+import { ComMacro } from './ComMacro.js';
 
 export class ComType {
   constructor(

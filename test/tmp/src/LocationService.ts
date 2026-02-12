@@ -55,6 +55,8 @@ export class LocationService {
   openapiDoc:any
 
   constructor() {
+  
+    
   }
   
   getLocationList(): Location[] {

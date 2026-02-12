@@ -117,9 +117,9 @@ cp ../e2e._test_.ts ./src/test/e2e.test.ts
 cp ../jest.config.cjs ./jest.config.cjs
 
 # Modify the generated services to add test code from the service templates:
-node ./TSCodeModifier.cjs ../LocationService.ts ./src/LocationService.ts
-node ./TSCodeModifier.cjs ../HelloService.ts ./src/HelloService.ts
-node ./TSCodeModifier.cjs ../DeviceService.ts ./src/DeviceService.ts
+node ../TSCodeModifier.cjs ../LocationService.ts ./src/LocationService.ts
+node ../TSCodeModifier.cjs ../HelloService.ts ./src/HelloService.ts
+node ../TSCodeModifier.cjs ../DeviceService.ts ./src/DeviceService.ts
 
 # The com extension service code is more complex and requires additional modifications, so we'll just copy the modified file directly instead of using the code modifier:
 cp ../CommService.ts ./src/CommService.ts

@@ -10,6 +10,8 @@ export class DeviceService {
   openapiDoc:any
 
   constructor() {
+  
+    
   }
   
   getDeviceList({locationname}: {locationname: string}): IotDevice[] {

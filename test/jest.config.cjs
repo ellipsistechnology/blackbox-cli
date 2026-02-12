@@ -1,7 +1,7 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
   // Use the ts-jest preset to handle .ts files
-  preset: 'ts-jest',
+  preset: 'ts-jest/presets/default-esm', // Use the ESM preset
   
   // Set the environment to 'node' since we are testing an API
   testEnvironment: 'node',
@@ -25,5 +25,15 @@ module.exports = {
   moduleNameMapper: {
     // Maps imports ending in .js to their .ts equivalent for Jest
     '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
+  
+  transform: {
+    // Use ts-jest to handle files and pass the ESM flag
+    '^.+\\.tsx?$': [
+      'ts-jest',
+      {
+        useESM: true,
+      },
+    ],
   },
 };

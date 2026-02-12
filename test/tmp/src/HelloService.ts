@@ -9,6 +9,8 @@ export class HelloService {
   openapiDoc:any
 
   constructor() {
+  
+    
   }
   
   getHello(): string {

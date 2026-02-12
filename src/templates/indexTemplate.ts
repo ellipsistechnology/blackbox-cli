@@ -28,7 +28,9 @@ const excludePaths = [
 const openapiDocPath = path.join(__dirname, './openapi.json')
 const openapiDoc = JSON.parse(fs.readFileSync(openapiDocPath, 'utf8'))
 
-class _InitIoc {
+let app: Express.Application | null = null
+
+export class InitServer {
     openapiDoc: any
 
     @factory('openapi-doc')
@@ -36,9 +38,13 @@ class _InitIoc {
         return openapiDoc
     }
 
+    getApp(): any {
+        return app
+    }
+
     // Initialize the server and load controllers:
     @taggedService('init', 'server')
-    async init() {
+    async init(startServer = true) {
 
         // Load all source files to ensure annotations are read:
         const excludes = excludePaths.reduce((acc, exclude) => {
@@ -66,14 +72,16 @@ class _InitIoc {
 
         // Initialize the Express app:
         const expressAppConfig = oas3Tools.expressAppConfig(openapiDocPath, options);
-        const app = expressAppConfig.getApp();
+        app = expressAppConfig.getApp();
 
         // Start the HTTP server:
-        http.createServer(app).listen(serverPort, () => {
-            console.log('Server started at '+new Date().toISOString())
-            console.log('Server is listening on port '+serverPort)
-            console.log('Swagger UI is available at http://localhost:'+serverPort+'/docs')
-        });
+        if (startServer) {
+            http.createServer(app).listen(serverPort, () => {
+                console.log('Server started at '+new Date().toISOString())
+                console.log('Server is listening on port '+serverPort)
+                console.log('Swagger UI is available at http://localhost:'+serverPort+'/docs')
+            })
+        }
     }
 }
 
