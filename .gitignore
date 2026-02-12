@@ -18,7 +18,7 @@ temp/
 
 # Test outputs
 dev/
-test/tmp/
+#test/tmp/
 
 # IDE files
 .vscode/

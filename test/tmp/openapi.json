@@ -1,0 +1,927 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "IoT Test Service",
+    "version": "0.1.0",
+    "description": "This template provides a starting point for a Blackbox API with only a root node."
+  },
+  "components": {
+    "parameters": {
+      "query-meta": {
+        "in": "query",
+        "name": "meta",
+        "schema": {
+          "type": "string"
+        },
+        "required": false,
+        "allowEmptyValue": true,
+        "description": "Get metadata instead of the service or object."
+      },
+      "path-locationname": {
+        "in": "path",
+        "name": "locationname",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "The locationname of the location."
+      },
+      "path-deviceindex": {
+        "in": "path",
+        "name": "deviceindex",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "The deviceindex of the iot-device."
+      },
+      "path-tabbed-serviceindex": {
+        "in": "path",
+        "name": "tabbed-serviceindex",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "The tabbed-serviceindex of the string."
+      }
+    },
+    "schemas": {
+      "oas3schema": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "object",
+              "array",
+              "string",
+              "number",
+              "boolean",
+              "integer"
+            ]
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/oas3schema"
+            }
+          },
+          "items": {
+            "$ref": "#/components/schemas/oas3schema"
+          },
+          "required": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "service": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "href": {
+            "type": "string",
+            "format": "uri"
+          },
+          "access": {
+            "type": "string",
+            "enum": [
+              "index",
+              "id",
+              "unique"
+            ]
+          },
+          "identifier": {
+            "type": "string"
+          },
+          "type": {
+            "type": "object",
+            "properties": {
+              "format": {
+                "type": "string",
+                "enum": [
+                  "oas3"
+                ]
+              },
+              "schema": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "href": {
+                        "type": "string",
+                        "format": "uri"
+                      }
+                    }
+                  },
+                  {
+                    "$ref": "#/components/schemas/oas3schema"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      "service-list": {
+        "type": "object",
+        "properties": {
+          "services": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/service"
+            }
+          }
+        }
+      },
+      "metadata": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      },
+      "index-response": {
+        "type": "object",
+        "properties": {
+          "index": {
+            "type": "number"
+          }
+        }
+      },
+      "location": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          }
+        }
+      },
+      "location-name": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "iot-device": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "A list of services provided by this API.",
+        "operationId": "getRootService",
+        "tags": [
+          "root"
+        ],
+        "responses": {
+          "200": {
+            "description": "200 OK Response: The list of services.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/service-list"
+                    },
+                    {
+                      "$ref": "#/components/schemas/metadata"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "operationId": "getOptions",
+        "responses": {
+          "200": {
+            "description": "List all available HTTP methods."
+          }
+        }
+      }
+    },
+    "/location": {
+      "get": {
+        "operationId": "getLocationList",
+        "summary": "Retrieve a list of location objects.",
+        "description": "Retrieve a list of location objects.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/query-meta"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the list of location.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/location"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "operationId": "getOptionsForLocationList",
+        "responses": {
+          "200": {
+            "description": "List all available HTTP methods."
+          }
+        }
+      },
+      "x-bb-service": {
+        "access": "id",
+        "identifier": "name"
+      },
+      "summary": "Operations on location",
+      "description": "IoT supported buildings and locatoins.",
+      "post": {
+        "operationId": "createLocation",
+        "summary": "Creates a location object.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/location"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "location successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/location-name"
+                }
+              }
+            }
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/location/{locationname}": {
+      "get": {
+        "summary": "Get a location object",
+        "operationId": "getLocation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/query-meta"
+          },
+          {
+            "$ref": "#/components/parameters/path-locationname"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The requested location object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/location"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "operationId": "getOptionsForLocation",
+        "responses": {
+          "200": {
+            "description": "List all available HTTP methods."
+          }
+        }
+      },
+      "put": {
+        "operationId": "replaceLocation",
+        "summary": "Replace a location.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/path-locationname"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/location"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "location replaced successfully."
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateLocation",
+        "summary": "Update some properties of a location.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/path-locationname"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/location"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "location updated successfully."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteLocation",
+        "summary": "Delete a location.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/path-locationname"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "location deleted successfully."
+          }
+        }
+      }
+    },
+    "/location/{locationname}/device": {
+      "get": {
+        "operationId": "getDeviceList",
+        "summary": "Retrieve a list of iot-device objects.",
+        "description": "Retrieve a list of iot-device objects.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/query-meta"
+          },
+          {
+            "$ref": "#/components/parameters/path-locationname"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the list of iot-device.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/iot-device"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "operationId": "getOptionsForDeviceList",
+        "responses": {
+          "200": {
+            "description": "List all available HTTP methods."
+          }
+        }
+      },
+      "x-bb-service": {
+        "access": "index"
+      },
+      "summary": "Operations on device",
+      "description": "This service allows management of iot-device objects.",
+      "post": {
+        "operationId": "createDevice",
+        "summary": "Creates a iot-device object.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/iot-device"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "iot-device successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/index-response"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/path-locationname"
+          }
+        ]
+      }
+    },
+    "/location/{locationname}/device/{deviceindex}": {
+      "get": {
+        "summary": "Get a iot-device object",
+        "operationId": "getDevice",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/query-meta"
+          },
+          {
+            "$ref": "#/components/parameters/path-locationname"
+          },
+          {
+            "$ref": "#/components/parameters/path-deviceindex"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The requested iot-device object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/iot-device"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "operationId": "getOptionsForDevice",
+        "responses": {
+          "200": {
+            "description": "List all available HTTP methods."
+          }
+        }
+      },
+      "put": {
+        "operationId": "replaceDevice",
+        "summary": "Replace a iot-device.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/path-locationname"
+          },
+          {
+            "$ref": "#/components/parameters/path-deviceindex"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/iot-device"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "iot-device replaced successfully."
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateDevice",
+        "summary": "Update some properties of a iot-device.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/path-locationname"
+          },
+          {
+            "$ref": "#/components/parameters/path-deviceindex"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/iot-device"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "iot-device updated successfully."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteDevice",
+        "summary": "Delete a iot-device.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/path-locationname"
+          },
+          {
+            "$ref": "#/components/parameters/path-deviceindex"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "iot-device deleted successfully."
+          }
+        }
+      }
+    },
+    "/hello": {
+      "get": {
+        "operationId": "getHello",
+        "summary": "Retrieve the string object.",
+        "description": "Retrieve the string object.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/query-meta"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the string.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "operationId": "getOptionsForHello",
+        "responses": {
+          "200": {
+            "description": "List all available HTTP methods."
+          }
+        }
+      },
+      "x-bb-service": {
+        "access": "unique"
+      },
+      "summary": "Operations on hello",
+      "description": "This service allows access to a unique string object.",
+      "post": {
+        "operationId": "createHello",
+        "summary": "Creates a string object.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "string successfully created."
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/comm": {
+      "get": {
+        "operationId": "getComm",
+        "summary": "Retrieve the string object.",
+        "description": "Retrieve the string object.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/query-meta"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the string.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "x-bb-com-macro": {
+          "commands": [
+            "SYS:Q"
+          ],
+          "responses": [
+            "^System Cmd Received(.*[\\n\\r]+)*Cmd Finished$"
+          ]
+        }
+      },
+      "options": {
+        "operationId": "getOptionsForComm",
+        "responses": {
+          "200": {
+            "description": "List all available HTTP methods."
+          }
+        }
+      },
+      "x-bb-service": {
+        "access": "unique"
+      },
+      "summary": "Operations on comm",
+      "description": "This service allows access to a unique string object.",
+      "post": {
+        "operationId": "createComm",
+        "summary": "Creates a string object.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "string successfully created."
+          }
+        },
+        "parameters": []
+      },
+      "put": {
+        "operationId": "replaceComm",
+        "summary": "Replace a string.",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "string replaced successfully."
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateComm",
+        "summary": "Update some properties of a string.",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "string updated successfully."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteComm",
+        "summary": "Delete a string.",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "string deleted successfully."
+          }
+        }
+      }
+    },
+    "/tabbed-service": {
+      "get": {
+        "operationId": "getTabbedServiceList",
+        "summary": "Retrieve a list of string objects.",
+        "description": "Retrieve a list of string objects.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/query-meta"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the list of string.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "operationId": "getOptionsForTabbedServiceList",
+        "responses": {
+          "200": {
+            "description": "List all available HTTP methods."
+          }
+        }
+      },
+      "x-bb-service": {
+        "metadata": {
+          "ui": {
+            "subservice-display": "tabs",
+            "auto-open-single": "true",
+            "service-view": {
+              "href": "http://localhost:5174/tabbed-service"
+            }
+          }
+        }
+      },
+      "summary": "Operations on tabbed-service",
+      "description": "This service allows management of string objects.",
+      "post": {
+        "operationId": "createTabbedService",
+        "summary": "Creates a string object.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "string successfully created."
+          }
+        },
+        "parameters": []
+      }
+    },
+    "/tabbed-service/{tabbed-serviceindex}": {
+      "get": {
+        "summary": "Get a string object",
+        "operationId": "getTabbedService",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/query-meta"
+          },
+          {
+            "$ref": "#/components/parameters/path-tabbed-serviceindex"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The requested string object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "operationId": "getOptionsForTabbedService",
+        "responses": {
+          "200": {
+            "description": "List all available HTTP methods."
+          }
+        }
+      },
+      "put": {
+        "operationId": "replaceTabbedService",
+        "summary": "Replace a string.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/path-tabbed-serviceindex"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "string replaced successfully."
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateTabbedService",
+        "summary": "Update some properties of a string.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/path-tabbed-serviceindex"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "string updated successfully."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteTabbedService",
+        "summary": "Delete a string.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/path-tabbed-serviceindex"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "string deleted successfully."
+          }
+        }
+      }
+    }
+  },
+  "x-bb-com-types": {
+    "com1": {
+      "baud": "115200",
+      "initCommands": [
+        ":HELP"
+      ],
+      "initResponses": [
+        "TEST SERVICE"
+      ]
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "name": "iot",
+  "repositories": [
+    {
+      "file": "../datatypes.json"
+    }
+  ],
+  "extensions": [
+    {
+      "name": "Test2",
+      "description": "A test extension",
+      "types": {
+        "test": "A test type"
+      },
+      "commands": [
+        "add"
+      ],
+      "path": "/Users/ben/dev/blackbox-cli/test/tmp/.bb/extensions/Test2-testExtension.js"
+    },
+    {
+      "name": "bb-com-extension",
+      "types": {
+        "com-type": "Type of serial device.",
+        "com-macro": "A macro to send over the serial link.",
+        "com-utils": "Helper utilities for accessing serial communications."
+      },
+      "options": {
+        "--init-commands <string>": "The serial command to send to initialise the device.",
+        "--init-responses <string>": "The expected response from the device after sending the init command, given as a regular expression.",
+        "--commands <string>": "The sequence of commands to send in the macro, separated by semicolons.",
+        "--responses <string>": "Expected responses for each command given as regular expressions, separated by semicolons.",
+        "--baud <string>": "The baud rate for the serial connection.",
+        "--method <string>": "The HTTP method to use (GET, POST, etc.) for a macro."
+      },
+      "commands": [
+        "add",
+        "delete",
+        "generate"
+      ],
+      "path": "/Users/ben/dev/blackbox-cli/test/tmp/.bb/extensions/bb-com-extension-index.js"
+    }
+  ]
+}

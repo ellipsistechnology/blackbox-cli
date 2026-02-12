@@ -110,14 +110,26 @@ npm i
 echo
 echo Setting up test system in generated server...
 
-npm i jest supertest @types/jest @types/supertest --save-dev
+npm i jest ts-jest supertest @types/jest @types/supertest --save-dev
 
 mkdir src/test
 cp ../e2e._test_.ts ./src/test/e2e.test.ts
 cp ../jest.config.cjs ./jest.config.cjs
 
+# Modify the generated services to add test code from the service templates:
+node ./TSCodeModifier.cjs ../LocationService.ts ./src/LocationService.ts
+node ./TSCodeModifier.cjs ../HelloService.ts ./src/HelloService.ts
+node ./TSCodeModifier.cjs ../DeviceService.ts ./src/DeviceService.ts
+
+# The com extension service code is more complex and requires additional modifications, so we'll just copy the modified file directly instead of using the code modifier:
+cp ../CommService.ts ./src/CommService.ts
+cp ../ComType.ts ./src/ComType.ts
+cp ../ComMacro.ts ./src/ComMacro.ts
+cp ../ComPort.ts ./src/ComPort.ts
+npm i serialport
+
 # add test script to package.json
-node -e "let pkg=require('./package.json'); pkg.scripts.test='jest'; require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2));"
+node -e "let pkg=require('./package.json'); pkg.scripts.test='node --experimental-vm-modules node_modules/jest/bin/jest.js'; require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2));"
 
 
 echo
