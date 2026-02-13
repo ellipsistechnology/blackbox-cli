@@ -110,7 +110,7 @@ export function ${operationId}(req: any, res: any, next: any) {
         ${functionCheck('')}
         ${pathParamsDefinitions}
         Promise.resolve(wrapper.service.${operationId}({${pathParamsList}}))
-        .then(() => {res.status(200).json({}); next()})
+        .then(() => {res.status(204).json({}); next()})
         .catch(err => next(err))
 }
     
@@ -143,7 +143,7 @@ export function ${operationId}(req: any, res: any, next: any) {
             if(data.${bbConfig.access === 'id' ? (bbConfig.identifier || 'id') : 'index' } === undefined) {
                 next(new InternalServerError("Service did not return the ${bbConfig.access === 'id' ? (bbConfig.identifier || 'id') : 'index' } of the created object."))
             } else {
-                res.status(200).json(data)
+                ${bbConfig.access === 'unique' ? `res.status(201).json({})` : `res.status(200).json(data)`}
             }`
             }
             next()
@@ -162,7 +162,7 @@ export function ${operationId}(req: any, res: any, next: any) {
         ${functionCheck('')}
         ${pathParamsDefinitions}
         Promise.resolve(wrapper.service.${operationId}({data: req.body, ${pathParamsList}}))
-        .then(data => {res.status(200).json({}); next()})
+        .then(data => {res.status(204).json({}); next()})
         .catch(err => next(err))
 }
 
@@ -177,7 +177,7 @@ export function ${operationId}(req: any, res: any, next: any) {
         ${functionCheck('')}
         ${pathParamsDefinitions}
         Promise.resolve(wrapper.service.${operationId}({data: req.body, ${pathParamsList}}))
-        .then(data => {res.status(200).json({}); next()})
+        .then(data => {res.status(204).json({}); next()})
         .catch(err => next(err))
 }
 

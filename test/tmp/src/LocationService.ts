@@ -2,6 +2,7 @@ import {serviceClass, autowired} from 'ellipsis-ioc'
 import Location from './Location.js'
 import LocationName from './LocationName.js'
 import IotDevice from './IotDevice.js'
+import HttpError from '../gensrc/HttpError.js'
 
 export const locations: (Location&{devices:IotDevice[]})[] = [
   {
@@ -69,7 +70,10 @@ export class LocationService {
   }
 
   getLocation({locationname}: {locationname: string}): Location {
-    const loc = locations.find(loc => loc.name === locationname)!
+    const loc = locations.find(loc => loc.name === locationname)
+    if(!loc) {
+      throw new HttpError(404, `Location ${locationname} not found.`)
+    }
     return {
       name: loc.name,
       address: loc.address
@@ -78,8 +82,9 @@ export class LocationService {
 
   replaceLocation({locationname, data}: {locationname: string, data: Location}): void {
     if(!locations.find(loc => loc.name === locationname)?.name) {
-      throw new Error(`Location ${locationname} not found.`)
+      throw new HttpError(404, `Location ${locationname} not found.`)
     }
+    
     const index = locations.findIndex(loc => loc.name === locationname)
     locations.splice(index, 1, {...data, devices: locations[index].devices})
   }

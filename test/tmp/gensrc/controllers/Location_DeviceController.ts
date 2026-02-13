@@ -106,7 +106,7 @@ export function replaceDevice(req: any, res: any, next: any) {
         const locationname = req.openapi.pathParams['locationname']
     const deviceindex = req.openapi.pathParams['deviceindex']
         Promise.resolve(wrapper.service.replaceDevice({data: req.body, locationname, deviceindex}))
-        .then(data => {res.status(200).json({}); next()})
+        .then(data => {res.status(204).json({}); next()})
         .catch(err => next(err))
 }
 
@@ -123,7 +123,7 @@ export function updateDevice(req: any, res: any, next: any) {
         const locationname = req.openapi.pathParams['locationname']
     const deviceindex = req.openapi.pathParams['deviceindex']
         Promise.resolve(wrapper.service.updateDevice({data: req.body, locationname, deviceindex}))
-        .then(data => {res.status(200).json({}); next()})
+        .then(data => {res.status(204).json({}); next()})
         .catch(err => next(err))
 }
 
@@ -140,7 +140,7 @@ export function deleteDevice(req: any, res: any, next: any) {
         const locationname = req.openapi.pathParams['locationname']
     const deviceindex = req.openapi.pathParams['deviceindex']
         Promise.resolve(wrapper.service.deleteDevice({locationname, deviceindex}))
-        .then(() => {res.status(200).json({}); next()})
+        .then(() => {res.status(204).json({}); next()})
         .catch(err => next(err))
 }
     

@@ -1,5 +1,5 @@
 import { get } from 'http'
-import { jsonTypes, makeContentSchema } from '../utils.js'
+import { dataTypeToMediaTypeMap, makeContentSchema } from '../utils.js'
 
 export default function (
     {operationId, serviceName, datatype, access, identifier, pathParams}: {
@@ -43,25 +43,24 @@ export default function (
     }
 
     // Add response schema:
+    const mediaType = dataTypeToMediaTypeMap[datatype] ? dataTypeToMediaTypeMap[datatype] : 'application/json'
     if(access === 'unique') {
       // Unique service - returns a single object:
       getDefinition.get.responses["200"] = {
         "description": `Successfully retrieved the ${datatype}.`,
-        "content": {
-          "application/json": { "schema": makeContentSchema(datatype) }
-        }
+        "content": {}
       }
+      getDefinition.get.responses["200"].content[mediaType] = { "schema": makeContentSchema(datatype) }
     } else {
       // ID or index service - returns a list of objects:
       getDefinition.get.responses["200"] = {
         "description": `Successfully retrieved the list of ${datatype}.`,
-        "content": {
-          "application/json": { 
-            "schema": {
-              type: "array",
-              items: makeContentSchema(datatype)
-            }
-          }
+        "content": {}
+      }
+      getDefinition.get.responses["200"].content[mediaType] = { 
+        "schema": {
+          type: "array",
+          items: makeContentSchema(datatype)
         }
       }
     }

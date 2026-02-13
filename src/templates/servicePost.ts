@@ -1,4 +1,4 @@
-import { jsonTypes, makeContentSchema } from '../utils.js'
+import { dataTypeToMediaTypeMap, jsonTypes, makeContentSchema } from '../utils.js'
 
 export default function (
     {operationId, datatype, responseSchema, pathParams} :
@@ -14,9 +14,7 @@ export default function (
         "summary": "Creates a "+datatype+" object.",
         "requestBody": {
             "required": true,
-            "content": {
-                "application/json": { "schema": makeContentSchema(datatype)}
-            }
+            "content": {}
         } as any,
         "responses": {
             "200": {
@@ -24,6 +22,8 @@ export default function (
             } as any
         }
     } as any
+    const mediaType = dataTypeToMediaTypeMap[datatype] ? dataTypeToMediaTypeMap[datatype] : 'application/json'
+    postDefinition.requestBody.content[mediaType] = { "schema": makeContentSchema(datatype)}
 
     // Add id/index parameter if needed:
     if(pathParams) {

@@ -86,6 +86,16 @@ export const reservedTypes: string[] = [
 ]
 reservedTypes.push(...jsonTypes)
 
+export const dataTypeToMediaTypeMap: {[key:string]: string} = {
+  "string": "text/plain",
+  "integer": "application/json",
+  "number": "application/json",
+  "boolean": "application/json",
+  "array": "application/json",
+  "object": "application/json",
+  "any": "application/json"
+}
+
 export const reservedClasses: string[] = reservedTypes.map( t => toCammelCase(t) )
 
 // export const importMap = {

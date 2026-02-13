@@ -590,7 +590,7 @@
           "200": {
             "description": "Successfully retrieved the string.",
             "content": {
-              "application/json": {
+              "text/plain": {
                 "schema": {
                   "type": "string"
                 }
@@ -618,7 +618,7 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "type": "string"
               }

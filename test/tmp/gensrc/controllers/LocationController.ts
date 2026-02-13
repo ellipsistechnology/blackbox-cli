@@ -104,7 +104,10 @@ export function replaceLocation(req: any, res: any, next: any) {
 
         const locationname = req.openapi.pathParams['locationname']
         Promise.resolve(wrapper.service.replaceLocation({data: req.body, locationname}))
-        .then(data => {res.status(200).json({}); next()})
+        .then(data => {
+            res.status(204).json({}); 
+            next()
+        })
         .catch(err => next(err))
 }
 
@@ -120,7 +123,7 @@ export function updateLocation(req: any, res: any, next: any) {
 
         const locationname = req.openapi.pathParams['locationname']
         Promise.resolve(wrapper.service.updateLocation({data: req.body, locationname}))
-        .then(data => {res.status(200).json({}); next()})
+        .then(data => {res.status(204).json({}); next()})
         .catch(err => next(err))
 }
 
@@ -136,7 +139,7 @@ export function deleteLocation(req: any, res: any, next: any) {
 
         const locationname = req.openapi.pathParams['locationname']
         Promise.resolve(wrapper.service.deleteLocation({locationname}))
-        .then(() => {res.status(200).json({}); next()})
+        .then(() => {res.status(204).json({}); next()})
         .catch(err => next(err))
 }
     
