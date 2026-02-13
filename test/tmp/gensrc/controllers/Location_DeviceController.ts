@@ -57,7 +57,7 @@ export function createDevice(req: any, res: any, next: any) {
             if(data.index === undefined) {
                 next(new InternalServerError("Service did not return the index of the created object."))
             } else {
-                res.status(200).json(data)
+                res.status(201).json(data)
             }
             next()
         })

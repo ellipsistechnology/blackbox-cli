@@ -53,7 +53,7 @@ export function createHello(req: any, res: any, next: any) {
         
         Promise.resolve(wrapper.service.createHello({data: req.body, }))
         .then(data => {
-            res.status(201).json(data)
+            res.status(200).json(data)
             next()
         })
         .catch(err => next(err))

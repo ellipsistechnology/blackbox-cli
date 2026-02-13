@@ -26,6 +26,7 @@ module.exports = {
     // Maps imports ending in .js to their .ts equivalent for Jest
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },
+  
   transform: {
     // Use ts-jest to handle files and pass the ESM flag
     '^.+\\.tsx?$': [

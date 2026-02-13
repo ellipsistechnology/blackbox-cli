@@ -104,7 +104,7 @@ describe('Hello Service', () => {
                 .post('/hello')
                 .set('Content-Type', 'text/plain')
                 .send(newMessage)
-                .expect(201);
+                .expect(200);
 
             // Check that the message is updated:
             const getResponse = await supertest(initServer.getApp())
@@ -205,7 +205,7 @@ describe('Location Service', () => {
             const response = await supertest(initServer.getApp())
                 .post('/location')
                 .send(newLocation)
-                .expect(200);
+                .expect(201);
 
             // Should return the name of the created location:
             expect(response.body).toHaveProperty('name', newLocation.name);
@@ -385,7 +385,7 @@ describe('Device Service', () => {
     })
 
     describe('POST /location/{locationname}/device', () => {
-        it('should create a new device and return 200', async () => {
+        it('should create a new device and return 201', async () => {
             const app = initServer.getApp()
             const location = await firstLocation(app)
 
@@ -397,7 +397,7 @@ describe('Device Service', () => {
             const response = await supertest(app)
                 .post(`/location/${encodeURIComponent(location.name)}/device`)
                 .send(newDevice)
-                .expect(200);
+                .expect(201);
 
             // The response should include the index of the created device:
             expect(response.body).toHaveProperty('index');

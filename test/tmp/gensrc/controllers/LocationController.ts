@@ -57,7 +57,7 @@ export function createLocation(req: any, res: any, next: any) {
             if(data.name === undefined) {
                 next(new InternalServerError("Service did not return the name of the created object."))
             } else {
-                res.status(200).json(data)
+                res.status(201).json(data)
             }
             next()
         })
@@ -104,10 +104,7 @@ export function replaceLocation(req: any, res: any, next: any) {
 
         const locationname = req.openapi.pathParams['locationname']
         Promise.resolve(wrapper.service.replaceLocation({data: req.body, locationname}))
-        .then(data => {
-            res.status(204).json({}); 
-            next()
-        })
+        .then(data => {res.status(204).json({}); next()})
         .catch(err => next(err))
 }
 

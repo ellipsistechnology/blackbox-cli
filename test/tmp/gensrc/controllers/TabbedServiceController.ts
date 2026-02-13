@@ -57,7 +57,7 @@ export function createTabbedService(req: any, res: any, next: any) {
             if(data.index === undefined) {
                 next(new InternalServerError("Service did not return the index of the created object."))
             } else {
-                res.status(200).json(data)
+                res.status(201).json(data)
             }
             next()
         })
@@ -104,7 +104,7 @@ export function replaceTabbedService(req: any, res: any, next: any) {
 
         const tabbedServiceindex = req.openapi.pathParams['tabbedServiceindex']
         Promise.resolve(wrapper.service.replaceTabbedService({data: req.body, tabbedServiceindex}))
-        .then(data => {res.status(200).json({}); next()})
+        .then(data => {res.status(204).json({}); next()})
         .catch(err => next(err))
 }
 
@@ -120,7 +120,7 @@ export function updateTabbedService(req: any, res: any, next: any) {
 
         const tabbedServiceindex = req.openapi.pathParams['tabbedServiceindex']
         Promise.resolve(wrapper.service.updateTabbedService({data: req.body, tabbedServiceindex}))
-        .then(data => {res.status(200).json({}); next()})
+        .then(data => {res.status(204).json({}); next()})
         .catch(err => next(err))
 }
 
@@ -136,7 +136,7 @@ export function deleteTabbedService(req: any, res: any, next: any) {
 
         const tabbedServiceindex = req.openapi.pathParams['tabbedServiceindex']
         Promise.resolve(wrapper.service.deleteTabbedService({tabbedServiceindex}))
-        .then(() => {res.status(200).json({}); next()})
+        .then(() => {res.status(204).json({}); next()})
         .catch(err => next(err))
 }
     

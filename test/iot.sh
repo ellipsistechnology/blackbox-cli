@@ -134,10 +134,8 @@ node -e "let pkg=require('./package.json'); pkg.scripts.test='node --experimenta
 
 echo
 echo Building server...
-
 npm run build
 
-
 echo
-echo Test server generation complete.
-cd ..
+echo Running tests...
+npm run test

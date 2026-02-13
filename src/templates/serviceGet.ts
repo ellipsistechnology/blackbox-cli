@@ -55,12 +55,13 @@ export default function (
       // ID or index service - returns a list of objects:
       getDefinition.get.responses["200"] = {
         "description": `Successfully retrieved the list of ${datatype}.`,
-        "content": {}
-      }
-      getDefinition.get.responses["200"].content[mediaType] = { 
-        "schema": {
-          type: "array",
-          items: makeContentSchema(datatype)
+        "content": {
+          "application/json": {
+            "schema": {
+              type: "array",
+              items: makeContentSchema(datatype)
+            }
+          }
         }
       }
     }

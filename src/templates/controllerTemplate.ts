@@ -122,7 +122,9 @@ export function ${operationId}(req: any, res: any, next: any) {
                 throw new Error(`No requestBody found for ${method.toUpperCase()} for service ${path}.`)
             }
             
-            const schema = pathItem[method].requestBody.content['application/json'].schema
+            // const schema = pathItem[method].requestBody.content['application/json'].schema
+            const content = pathItem[method].requestBody.content
+            const schema = content['application/json']?.schema || content['text/plain']?.schema || content[Object.keys(content)[0]]?.schema;
             const datatype = schema['$ref'] ? schema['$ref'].substring(schema['$ref'].lastIndexOf('/')+1)
                                             : schema.type
 
@@ -143,7 +145,7 @@ export function ${operationId}(req: any, res: any, next: any) {
             if(data.${bbConfig.access === 'id' ? (bbConfig.identifier || 'id') : 'index' } === undefined) {
                 next(new InternalServerError("Service did not return the ${bbConfig.access === 'id' ? (bbConfig.identifier || 'id') : 'index' } of the created object."))
             } else {
-                ${bbConfig.access === 'unique' ? `res.status(201).json({})` : `res.status(200).json(data)`}
+                res.status(201).json(data)
             }`
             }
             next()

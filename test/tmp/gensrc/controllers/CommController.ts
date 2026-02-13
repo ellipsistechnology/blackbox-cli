@@ -71,7 +71,7 @@ export function replaceComm(req: any, res: any, next: any) {
 
         
         Promise.resolve(wrapper.service.replaceComm({data: req.body, }))
-        .then(data => {res.status(200).json({}); next()})
+        .then(data => {res.status(204).json({}); next()})
         .catch(err => next(err))
 }
 
@@ -87,7 +87,7 @@ export function updateComm(req: any, res: any, next: any) {
 
         
         Promise.resolve(wrapper.service.updateComm({data: req.body, }))
-        .then(data => {res.status(200).json({}); next()})
+        .then(data => {res.status(204).json({}); next()})
         .catch(err => next(err))
 }
 
@@ -103,7 +103,7 @@ export function deleteComm(req: any, res: any, next: any) {
 
         
         Promise.resolve(wrapper.service.deleteComm({}))
-        .then(() => {res.status(200).json({}); next()})
+        .then(() => {res.status(204).json({}); next()})
         .catch(err => next(err))
 }
     

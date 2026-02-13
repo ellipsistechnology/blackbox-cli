@@ -1,5 +1,5 @@
-import { kebab2Camel } from "../utils.js"
-import { jsonTypes, reservedClasses, reservedTypes, schemaToClassMap, toCammelCase } from '../utils.js'
+import { dataTypeToMediaTypeMap, kebab2Camel } from "../utils.js"
+import { jsonTypes, reservedClasses, schemaToClassMap, toCammelCase } from '../utils.js'
 
 export interface TemplateMap {
   serviceName:string
@@ -17,7 +17,8 @@ function methodType(oasDoc: any, path: string, method: string, schemaToClass: { 
   }
 
   // Get the schema for the 200 response:
-  const schema = oasDoc.paths[path][method].responses['200'].content['application/json'].schema;
+  const content = oasDoc.paths[path][method].responses['200'].content
+  const schema = content['application/json']?.schema || content['text/plain']?.schema || content[Object.keys(content)[0]]?.schema;
 
   let allOf
   if(Array.isArray(schema.allOf))

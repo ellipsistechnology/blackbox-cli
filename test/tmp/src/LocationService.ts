@@ -84,7 +84,6 @@ export class LocationService {
     if(!locations.find(loc => loc.name === locationname)?.name) {
       throw new HttpError(404, `Location ${locationname} not found.`)
     }
-    
     const index = locations.findIndex(loc => loc.name === locationname)
     locations.splice(index, 1, {...data, devices: locations[index].devices})
   }
@@ -92,7 +91,7 @@ export class LocationService {
   updateLocation({locationname, data}: {locationname: string, data: Location}): void {
     const loc = locations.find(loc => loc.name === locationname)
     if(!loc) {
-      throw new Error(`Location ${locationname} not found.`)
+      throw new HttpError(404, `Location ${locationname} not found.`)
     }
     if(data.address) {
       loc.address = data.address
