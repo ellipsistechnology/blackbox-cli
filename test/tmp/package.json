@@ -26,7 +26,8 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "ellipsis-ioc": "file:../../../ellipsis-ioc",
+    "ellipsis-com": "^0.1.0",
+    "ellipsis-ioc": "^1.1.0",
     "express": "^5.1.0",
     "glob": "^11.0.3",
     "serialport": "^13.0.0",

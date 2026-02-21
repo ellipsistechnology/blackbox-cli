@@ -1,12 +1,21 @@
-import { createRequire as __WEBPACK_EXTERNAL_createRequire } from "node:module";
-const __WEBPACK_EXTERNAL_createRequire_require = __WEBPACK_EXTERNAL_createRequire(import.meta.url);
+import * as __WEBPACK_EXTERNAL_MODULE_fs__ from "fs";
 /******/ var __webpack_modules__ = ({
 
-/***/ "./dist/src/ComManagerTemplate.js":
+/***/ "fs"
+/*!*********************!*\
+  !*** external "fs" ***!
+  \*********************/
+(module) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_fs__;
+
+/***/ },
+
+/***/ "./dist/src/ComManagerTemplate.js"
 /*!****************************************!*\
   !*** ./dist/src/ComManagerTemplate.js ***!
   \****************************************/
-/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
@@ -51,6 +60,8 @@ export class ComPort {
   private readMatch?: RegExp
   private readComplete = false
   private buffer: string = '' // TODO replace with Buffer
+
+  backgroundBuffer: string[] = []
 
   state: 'busy' | 'closed' | 'background' | 'connecting' = 'closed'
   type: ComType | null = null
@@ -144,12 +155,10 @@ export class ComPort {
     this.readComplete = false
     return new Promise<string>((resolve, reject) => {
       const checkCompletion = () => {
-        if( Date.now() - time > this.timeout) {
-          reject(new RequestTimeout(\`Timeout after \${this.timeout}ms while reading from port \${this.path}.\`))
-          return
-        }
         if (this.readComplete) {
           resolve(this.buffer.trim())
+        } else if( Date.now() - time > this.timeout) {
+          reject(new RequestTimeout(\`Timeout after \${this.timeout}ms while reading from port \${this.path}.\`))
         } else if (this.lastError) {
           reject(new Error(this.lastError))
         } else {
@@ -276,17 +285,6 @@ export class ComPort {
     }
 
     let macros = macros_operationId as ComMacro[]
-
-    // Ensure correct state:
-    // if(this.state === 'busy') {
-    //   throw new Error(\`Com port \${this.path} is busy.\`)
-    // }
-    // if(this.state === 'connecting') {
-    //   throw new Error(\`Com port not read - please wait for connection to complete before sending.\`)
-    // }
-    // if(this.state === 'closed') {
-    //   throw new Error(\`Com port is closed - please connect before sending.\`)
-    // }
     
     // Replace parameters in each macro command:
     if(params) {
@@ -381,9 +379,39 @@ export class ComPort {
   }
 
   receiveData(data: Buffer) {
-    // Log 
+    // Background Log:
     if(this.state === 'background') {
-      return // TODO
+      const dataStr = data.toString()
+      const lines = dataStr.split(/\r?\n/)
+
+      if(lines.length > 0) {
+        // Append to the last entry to ensure incompelte lines are joined:
+        if(this.backgroundBuffer.length > 0) {
+          this.backgroundBuffer[this.backgroundBuffer.length-1] += lines[0]
+        } else {
+          this.backgroundBuffer.push(lines[0])
+        }
+
+        // Add remaining lines as new entries:
+        for(let i = 1; i < lines.length; i++) {
+          if(lines[i].trim().length > 0) {
+            this.backgroundBuffer.push(lines[i])
+          }
+        }
+
+        // If the data string ends with a line ending, then
+        // add an empty line to represent the new line:
+        if(dataStr.endsWith('\n') || dataStr.endsWith('\r')) {
+          this.backgroundBuffer.push('')
+        }
+      }
+
+      // Limit background buffer size:
+      if(this.backgroundBuffer.length > 1000) {
+        this.backgroundBuffer.splice(this.backgroundBuffer.length - 10, 10)
+      }
+
+      return
     }
 
     // Read until pattern matched:
@@ -447,7 +475,7 @@ export class ComManager {
   }
 
   // TODO: Allow access by ID instead of index - devices will need a name for this.
-  async getComPort(typeName: string, index: number): Promise<ComPort> {
+  getComPort(typeName: string, index: number): ComPort {
     const typePorts = this.ports.filter(p => p.type?.name === typeName)
 
     // Make sure the port exists and has a known type:
@@ -519,7 +547,6 @@ export class ComManager {
               break
             } catch(err) {
               console.log(\`Failed to add type to port: \${port.toString()}\`)
-              console.error(err)
               continue
             }
           }
@@ -583,10 +610,22 @@ export class ComManager {
       }
       macros.init = []
       comType.initCommands.forEach((cmd: string, i: number) => {
+        // Extract flags and strip slashes if present:
+        let response = comType.initResponses[i] as string
+        let flags = ''
+        if(response.startsWith('/')) {
+          const lastSlash = response.lastIndexOf('/')
+          if(lastSlash < response.length - 1) {
+            flags = response.substring(lastSlash + 1)
+          }
+          response = response.substring(1, lastSlash)
+        }
+
+        // Add the macro:
         macros.init.push(
           new ComMacro(
             cmd,
-            new RegExp(comType.initResponses[i].replace(/^\\/|\\/$/g, '')) // remove leading and trailing slashes
+            new RegExp(response, flags)
           )
         )
       })
@@ -620,17 +659,7 @@ export class ComManager {
 }
 
 
-/***/ }),
-
-/***/ "fs":
-/*!*********************!*\
-  !*** external "fs" ***!
-  \*********************/
-/***/ ((module) => {
-
-module.exports = __WEBPACK_EXTERNAL_createRequire_require("fs");
-
-/***/ })
+/***/ }
 
 /******/ });
 /************************************************************************/
@@ -643,6 +672,12 @@ module.exports = __WEBPACK_EXTERNAL_createRequire_require("fs");
 /******/ 	var cachedModule = __webpack_module_cache__[moduleId];
 /******/ 	if (cachedModule !== undefined) {
 /******/ 		return cachedModule.exports;
+/******/ 	}
+/******/ 	// Check if module exists (development only)
+/******/ 	if (__webpack_modules__[moduleId] === undefined) {
+/******/ 		var e = new Error("Cannot find module '" + moduleId + "'");
+/******/ 		e.code = 'MODULE_NOT_FOUND';
+/******/ 		throw e;
 /******/ 	}
 /******/ 	// Create a new module (and put it into the cache)
 /******/ 	var module = __webpack_module_cache__[moduleId] = {
@@ -827,18 +862,18 @@ class BBComExtension {
             return;
         }
         // Create ComPort.ts if it doesn't exist:
-        if (!fs__WEBPACK_IMPORTED_MODULE_0__.existsSync('gensrc/ComPort.ts')) {
-            fs__WEBPACK_IMPORTED_MODULE_0__.writeFileSync('gensrc/ComManager.ts', (0,_src_ComManagerTemplate_js__WEBPACK_IMPORTED_MODULE_1__["default"])());
+        if (!fs__WEBPACK_IMPORTED_MODULE_0__["default"].existsSync('gensrc/ComPort.ts')) {
+            fs__WEBPACK_IMPORTED_MODULE_0__["default"].writeFileSync('gensrc/ComManager.ts', (0,_src_ComManagerTemplate_js__WEBPACK_IMPORTED_MODULE_1__["default"])());
             logp("Generated gensrc/ComPort.ts for serial communications.");
         }
         // Add serialport to package.json dependencies if not already present:
-        const packageJson = JSON.parse(fs__WEBPACK_IMPORTED_MODULE_0__.readFileSync('package.json', 'utf-8'));
+        const packageJson = JSON.parse(fs__WEBPACK_IMPORTED_MODULE_0__["default"].readFileSync('package.json', 'utf-8'));
         if (!packageJson.dependencies) {
             packageJson.dependencies = {};
         }
         if (!packageJson.dependencies['serialport']) {
             packageJson.dependencies['serialport'] = '^13.0.0';
-            fs__WEBPACK_IMPORTED_MODULE_0__.writeFileSync('package.json', JSON.stringify(packageJson, null, 2));
+            fs__WEBPACK_IMPORTED_MODULE_0__["default"].writeFileSync('package.json', JSON.stringify(packageJson, null, 2));
             logp("Added 'serialport' to package.json dependencies.\nPlease run 'npm install' to install the new dependency.");
         }
         /*
