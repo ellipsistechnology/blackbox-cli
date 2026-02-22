@@ -132,8 +132,9 @@ export function makeService(req: any, openapiDoc: any): Service | Metadata {
     if(!bbService) {
         return {}
     }
+    const content = req.openapi.schema.responses['200'].content
     const schema = convertSchemaPathsToURLs(
-        req.openapi.schema.responses['200'].content['application/json'].schema, 
+        (content['application/json']||content['text/plain']).schema, 
         '/api-specifications.yaml')
     const serviceNode = openapiDoc.paths[req.openapi.openApiRoute]
 

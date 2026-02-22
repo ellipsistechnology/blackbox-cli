@@ -30,7 +30,8 @@
         "--commands <string>": "The sequence of commands to send in the macro, separated by semicolons.",
         "--responses <string>": "Expected responses for each command given as regular expressions, separated by semicolons.",
         "--baud <string>": "The baud rate for the serial connection.",
-        "--method <string>": "The HTTP method to use (GET, POST, etc.) for a macro."
+        "--method <string>": "The HTTP method to use (GET, POST, etc.) for a macro.",
+        "--startup-delay <number>": "Optional delay in milliseconds to wait after opening the port before sending the init commands, to allow devices extra time to boot up."
       },
       "commands": [
         "add",

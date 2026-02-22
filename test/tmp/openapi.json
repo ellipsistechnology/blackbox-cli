@@ -657,10 +657,10 @@
         },
         "x-bb-com-macro": {
           "commands": [
-            "SYS:Q"
+            "GET DATA"
           ],
           "responses": [
-            "^System Cmd Received(.*[\\n\\r]+)*Cmd Finished$"
+            "CMD DONE$"
           ]
         }
       },
@@ -695,46 +695,14 @@
             "description": "string successfully created."
           }
         },
-        "parameters": []
-      },
-      "put": {
-        "operationId": "replaceComm",
-        "summary": "Replace a string.",
         "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "string"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "string replaced successfully."
-          }
-        }
-      },
-      "patch": {
-        "operationId": "updateComm",
-        "summary": "Update some properties of a string.",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "string"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "string updated successfully."
-          }
+        "x-bb-com-macro": {
+          "commands": [
+            "SET DATA {data}"
+          ],
+          "responses": [
+            "CMD DONE$"
+          ]
         }
       },
       "delete": {
@@ -745,6 +713,16 @@
           "200": {
             "description": "string deleted successfully."
           }
+        },
+        "x-bb-com-macro": {
+          "commands": [
+            "DEL DATA",
+            "Y"
+          ],
+          "responses": [
+            "Are you sure\\? \\(Y\\/N\\)$",
+            "CMD DONE$"
+          ]
         }
       }
     },
@@ -915,12 +893,13 @@
   },
   "x-bb-com-types": {
     "com1": {
-      "baud": "115200",
+      "baud": "9600",
+      "startupDelay": "2000",
       "initCommands": [
-        ":HELP"
+        "INFO"
       ],
       "initResponses": [
-        "TEST SERVICE"
+        "MOCK\\sDEVICE\\sV\\d+.?\\d*[\\n\\r]+STATUS: OK[\\n\\r]+CMD DONE$"
       ]
     }
   }

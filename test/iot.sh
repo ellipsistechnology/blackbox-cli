@@ -78,7 +78,7 @@ echo
 echo Adding COM extension with a new service...
 
 node ../../dist/index.js add extension -f ../../../bb-com-extension/bundle/index.js
-node ../../dist/index.js add service -n comm -d string --access unique
+node ../../dist/index.js add service -n comm -d string --access unique -m get,post,delete
 node ../../dist/index.js generate service
 node ../../dist/index.js generate server
 
@@ -86,9 +86,16 @@ node ../../dist/index.js generate server
 echo
 echo Testing COM extension:
 
-node ../../dist/index.js add com-type -n com1 --baud 115200 --init-commands ":HELP" --init-responses "/TEST SERVICE/" -p "/comm"
-
-node ../../dist/index.js add com-macro -p /comm --method get --commands "SYS:Q" --responses "/^System Cmd Received(.*[\n\r]+)*Cmd Finished$/"
+node ../../dist/index.js add com-type \
+    -n com1 \
+    --baud 9600 \
+    --startup-delay 2000\
+    --init-commands "INFO" \
+    --init-responses "/MOCK\sDEVICE\sV\d+.?\d*[\n\r]+STATUS: OK[\n\r]+CMD DONE$/" -p "/comm"
+node ../../dist/index.js add com-macro -p /comm --method get --commands "GET DATA" --responses "/CMD DONE$/"
+node ../../dist/index.js add com-macro -p /comm --method post --commands "SET DATA {data}" --responses "/CMD DONE$/"
+node ../../dist/index.js add com-macro -p /comm --method delete --commands "DEL DATA;Y" --responses "/Are you sure\? \(Y\/N\)$/;/CMD DONE$/"
+node ../../dist/index.js generate com-utils
 
 
 echo
@@ -123,10 +130,6 @@ node ../TSCodeModifier.cjs ../DeviceService.ts ./src/DeviceService.ts
 
 # The com extension service code is more complex and requires additional modifications, so we'll just copy the modified file directly instead of using the code modifier:
 cp ../CommService.ts ./src/CommService.ts
-cp ../ComType.ts ./src/ComType.ts
-cp ../ComMacro.ts ./src/ComMacro.ts
-cp ../ComPort.ts ./src/ComPort.ts
-npm i serialport
 
 # add test script to package.json
 node -e "let pkg=require('./package.json'); pkg.scripts.test='node --experimental-vm-modules node_modules/jest/bin/jest.js'; require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2));"

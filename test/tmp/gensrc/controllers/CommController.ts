@@ -59,38 +59,6 @@ export function createComm(req: any, res: any, next: any) {
         .catch(err => next(err))
 }
 
-// Replace an existing string object:
-export function replaceComm(req: any, res: any, next: any) {
-        if(typeof wrapper.service.replaceComm !== 'function') {
-            console.error("Service function replaceComm not found: "+
-                "Please implement function replaceComm in a service class tagged with the @service('comm') decorator."
-            )
-            next(new NotFound("Service function replaceComm not found."))
-            return
-        }
-
-        
-        Promise.resolve(wrapper.service.replaceComm({data: req.body, }))
-        .then(data => {res.status(204).json({}); next()})
-        .catch(err => next(err))
-}
-
-// Update an existing string object:
-export function updateComm(req: any, res: any, next: any) {
-        if(typeof wrapper.service.updateComm !== 'function') {
-            console.error("Service function updateComm not found: "+
-                "Please implement function updateComm in a service class tagged with the @service('comm') decorator."
-            )
-            next(new NotFound("Service function updateComm not found."))
-            return
-        }
-
-        
-        Promise.resolve(wrapper.service.updateComm({data: req.body, }))
-        .then(data => {res.status(204).json({}); next()})
-        .catch(err => next(err))
-}
-
 // Delete an existing object:
 export function deleteComm(req: any, res: any, next: any) {
         if(typeof wrapper.service.deleteComm !== 'function') {
