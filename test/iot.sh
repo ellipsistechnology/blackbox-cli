@@ -77,7 +77,8 @@ node ../../dist/index.js add test
 echo
 echo Adding COM extension with a new service...
 
-node ../../dist/index.js add extension -f ../../../bb-com-extension/bundle/index.js
+npm i -D bb-com-extension
+node ../../dist/index.js add extension -p bb-com-extension
 node ../../dist/index.js add service -n comm -d string --access unique -m get,post,delete
 node ../../dist/index.js generate service
 node ../../dist/index.js generate server
@@ -95,6 +96,7 @@ node ../../dist/index.js add com-type \
 node ../../dist/index.js add com-macro -p /comm --method get --commands "GET DATA" --responses "/CMD DONE$/"
 node ../../dist/index.js add com-macro -p /comm --method post --commands "SET DATA {data}" --responses "/CMD DONE$/"
 node ../../dist/index.js add com-macro -p /comm --method delete --commands "DEL DATA;Y" --responses "/Are you sure\? \(Y\/N\)$/;/CMD DONE$/"
+# TODO: Test timeout and return to background with invalid command with no response.
 node ../../dist/index.js generate com-utils
 
 

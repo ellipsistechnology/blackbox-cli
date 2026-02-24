@@ -12,12 +12,13 @@
       "types": {
         "test": "A test type"
       },
+      "path": "/Users/ben/dev/blackbox-cli/test/tmp/.bb/extensions/Test2-testExtension.js",
       "commands": [
         "add"
-      ],
-      "path": "/Users/ben/dev/blackbox-cli/test/tmp/.bb/extensions/Test2-testExtension.js"
+      ]
     },
     {
+      "path": "/Users/ben/dev/blackbox-cli/test/tmp/node_modules/bb-com-extension/bundle/index.js",
       "name": "bb-com-extension",
       "types": {
         "com-type": "Type of serial device.",
@@ -37,8 +38,7 @@
         "add",
         "delete",
         "generate"
-      ],
-      "path": "/Users/ben/dev/blackbox-cli/test/tmp/.bb/extensions/bb-com-extension-index.js"
+      ]
     }
   ]
 }

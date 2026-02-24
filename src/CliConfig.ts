@@ -33,7 +33,7 @@ export default class CliConfig {
     	.option('-n, --name <name>', "The name of the entity being added or modified.")
     	.option('-t, --title <title>', "The title of the API.")
     	.option('--desc <description>', 'The description of the API.')
-      .option('-p, --path <path>', "The path to the parent node in the case of sub-services. Use # as value placeholders. Defaults to the root node.")
+      .option('-p, --path <path>', "The path to the parent node in the case of sub-services (use # as value placeholders, defaults to the root node). The package name when adding an extension.")
       .option('--access <access>', "The access type for the service. One of 'unique', 'id' or 'index'.")
       .option('-i, --identifier <identifier>', "The identifier field for the service. E.g. 'id' or 'name'. Required if access is 'id' or 'index'.")
       .option('-d, --datatype <datatype>', "The data type of a service.")
