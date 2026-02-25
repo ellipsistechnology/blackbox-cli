@@ -6,7 +6,6 @@ enum Commands {
 	update   = "Update an existing item; must provide a type.",
 	list     = "Shows a list of items; must provide a type.",
 	delete   = "Delete an itesm; must provide a type.",
-	analyse  = "Analyses the API and attempts to identify any non-compliance.",
 	generate = "Generate server code from the OpenAPI document."
 }
 

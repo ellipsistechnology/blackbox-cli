@@ -1,4 +1,3 @@
-import { deprecate } from 'util'
 import {printEnum} from './print-helper.js'
 
 /**

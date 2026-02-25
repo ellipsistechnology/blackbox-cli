@@ -3,6 +3,7 @@ import {defaultFormat, fixWidth, maxLength} from './print-helper.js'
 import fs from 'fs'
 import { setVerboseLogging } from './logging.js';
 import ServerManager from './ServerManager.js';
+import pkg from '../package.json' with { type: 'json' }
 
 export default class CliConfig {
   // Common options:
@@ -26,9 +27,10 @@ export default class CliConfig {
   [opt: string]: any
 
   constructor(args:string[]) {
+    // Specify command line options:
     program
       .description("The Blackbox CLI")
-      .version('0.1.0')
+      .version(pkg.version)
       .usage('bb <command> [type] [options]')
     	.option('-n, --name <name>', "The name of the entity being added or modified.")
     	.option('-t, --title <title>', "The title of the API.")

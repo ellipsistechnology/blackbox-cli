@@ -18,7 +18,8 @@ export default class CliApplication {
 
   constructor(args:string[]) {
     this.args = args.slice(2)
-    this.options = new CliConfig(args.slice(1)) // FIXME: dev only; remove node command; fix for command line execution
+    args = args[0] === 'node' ? args.slice(1) : args // remove node command
+    this.options = new CliConfig(args)
   }
 
   async printHelp() {

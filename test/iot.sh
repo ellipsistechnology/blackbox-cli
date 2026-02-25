@@ -1,3 +1,5 @@
+# TODO: update a service.
+
 echo
 echo Creating IoT test service...
 
@@ -16,7 +18,6 @@ node ../../dist/index.js add repository --file ../datatypes.json
 
 echo
 echgo Adding datatype location...
-# FIXME: The following should automatically add the datatype from the repository without --file.
 node ../../dist/index.js add datatype \
     --name location
 
@@ -25,8 +26,8 @@ echo Adding service location...
 # TODO: --desc and/or --title should be saved to blackbox.json and used in service response.
 node ../../dist/index.js add service \
     --name location \
-    --title "Locations" \
-    --desc "IoT supported buildings and locatoins." \
+    --summary "Locations" \
+    --desc "IoT supported buildings and locations." \
     --access id \
     --identifier name \
     --datatype location \

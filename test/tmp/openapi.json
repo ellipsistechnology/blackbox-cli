@@ -268,8 +268,8 @@
         "access": "id",
         "identifier": "name"
       },
-      "summary": "Operations on location",
-      "description": "IoT supported buildings and locatoins.",
+      "summary": "Locations",
+      "description": "IoT supported buildings and locations.",
       "post": {
         "operationId": "createLocation",
         "summary": "Creates a location object.",

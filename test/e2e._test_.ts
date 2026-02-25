@@ -156,8 +156,8 @@ describe('Location Service', () => {
              }
              */
             expect(response.body).toHaveProperty('name', 'location');
-            expect(response.body).toHaveProperty('summary', 'Operations on location');
-            expect(response.body).toHaveProperty('description', 'IoT supported buildings and locatoins.');
+            expect(response.body).toHaveProperty('summary', 'Locations');
+            expect(response.body).toHaveProperty('description', 'IoT supported buildings and locations.');
             expect(response.body).toHaveProperty('href', '/location');
             expect(response.body).toHaveProperty('type');
             expect(response.body.type).toHaveProperty('format', 'oas3');
