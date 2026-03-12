@@ -142,7 +142,7 @@ export function ${operationId}(req: any, res: any, next: any) {
             ${bbConfig.access === 'unique' ?
                 'res.status(200).json(data)' : 
             `// Check for id or index in body and return 500 if not present:
-            if(data.${bbConfig.access === 'id' ? (bbConfig.identifier || 'id') : 'index' } === undefined) {
+            if(!data || data.${bbConfig.access === 'id' ? (bbConfig.identifier || 'id') : 'index' } === undefined) {
                 next(new InternalServerError("Service did not return the ${bbConfig.access === 'id' ? (bbConfig.identifier || 'id') : 'index' } of the created object."))
             } else {
                 res.status(201).json(data)

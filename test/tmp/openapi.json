@@ -35,14 +35,41 @@
         },
         "description": "The deviceindex of the iot-device."
       },
-      "path-tabbed-serviceindex": {
+      "path-tabbedServiceindex": {
         "in": "path",
-        "name": "tabbed-serviceindex",
+        "name": "tabbedServiceindex",
         "required": true,
         "schema": {
           "type": "string"
         },
-        "description": "The tabbed-serviceindex of the string."
+        "description": "The tabbedServiceindex of the string."
+      },
+      "path-tabbedSub1index": {
+        "in": "path",
+        "name": "tabbedSub1index",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "The tabbedSub1index of the string."
+      },
+      "path-tabbedSub2index": {
+        "in": "path",
+        "name": "tabbedSub2index",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "The tabbedSub2index of the string."
+      },
+      "path-tabbedSub3index": {
+        "in": "path",
+        "name": "tabbedSub3index",
+        "required": true,
+        "schema": {
+          "type": "string"
+        },
+        "description": "The tabbedSub3index of the string."
       }
     },
     "schemas": {
@@ -656,6 +683,7 @@
           }
         },
         "x-bb-com-macro": {
+          "name": "com1",
           "commands": [
             "GET DATA"
           ],
@@ -697,6 +725,7 @@
         },
         "parameters": [],
         "x-bb-com-macro": {
+          "name": "com1",
           "commands": [
             "SET DATA {data}"
           ],
@@ -715,6 +744,7 @@
           }
         },
         "x-bb-com-macro": {
+          "name": "com1",
           "commands": [
             "DEL DATA",
             "Y"
@@ -764,10 +794,7 @@
         "metadata": {
           "ui": {
             "subservice-display": "tabs",
-            "auto-open-single": "true",
-            "service-view": {
-              "href": "http://localhost:5174/tabbed-service"
-            }
+            "auto-open-single": "true"
           }
         }
       },
@@ -794,7 +821,7 @@
         "parameters": []
       }
     },
-    "/tabbed-service/{tabbed-serviceindex}": {
+    "/tabbed-service/{tabbedServiceindex}": {
       "get": {
         "summary": "Get a string object",
         "operationId": "getTabbedService",
@@ -803,7 +830,7 @@
             "$ref": "#/components/parameters/query-meta"
           },
           {
-            "$ref": "#/components/parameters/path-tabbed-serviceindex"
+            "$ref": "#/components/parameters/path-tabbedServiceindex"
           }
         ],
         "responses": {
@@ -832,13 +859,13 @@
         "summary": "Replace a string.",
         "parameters": [
           {
-            "$ref": "#/components/parameters/path-tabbed-serviceindex"
+            "$ref": "#/components/parameters/path-tabbedServiceindex"
           }
         ],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "type": "string"
               }
@@ -856,13 +883,13 @@
         "summary": "Update some properties of a string.",
         "parameters": [
           {
-            "$ref": "#/components/parameters/path-tabbed-serviceindex"
+            "$ref": "#/components/parameters/path-tabbedServiceindex"
           }
         ],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
                 "type": "string"
               }
@@ -880,7 +907,550 @@
         "summary": "Delete a string.",
         "parameters": [
           {
-            "$ref": "#/components/parameters/path-tabbed-serviceindex"
+            "$ref": "#/components/parameters/path-tabbedServiceindex"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "string deleted successfully."
+          }
+        }
+      }
+    },
+    "/tabbed-service/{tabbedServiceindex}/tabbed-sub1": {
+      "get": {
+        "operationId": "getTabbedSub1List",
+        "summary": "Retrieve a list of string objects.",
+        "description": "Retrieve a list of string objects.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/query-meta"
+          },
+          {
+            "$ref": "#/components/parameters/path-tabbedServiceindex"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the list of string.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "operationId": "getOptionsForTabbedSub1List",
+        "responses": {
+          "200": {
+            "description": "List all available HTTP methods."
+          }
+        }
+      },
+      "x-bb-service": {
+        "metadata": {
+          "ui": {
+            "service-view": {
+              "href": "http://localhost:5174/custom"
+            }
+          }
+        }
+      },
+      "summary": "Operations on tabbed-sub1",
+      "description": "This service allows management of string objects.",
+      "post": {
+        "operationId": "createTabbedSub1",
+        "summary": "Creates a string object.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "text/plain": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "string successfully created."
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/path-tabbedServiceindex"
+          }
+        ]
+      }
+    },
+    "/tabbed-service/{tabbedServiceindex}/tabbed-sub1/{tabbedSub1index}": {
+      "get": {
+        "summary": "Get a string object",
+        "operationId": "getTabbedSub1",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/query-meta"
+          },
+          {
+            "$ref": "#/components/parameters/path-tabbedServiceindex"
+          },
+          {
+            "$ref": "#/components/parameters/path-tabbedSub1index"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The requested string object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "operationId": "getOptionsForTabbedSub1",
+        "responses": {
+          "200": {
+            "description": "List all available HTTP methods."
+          }
+        }
+      },
+      "put": {
+        "operationId": "replaceTabbedSub1",
+        "summary": "Replace a string.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/path-tabbedServiceindex"
+          },
+          {
+            "$ref": "#/components/parameters/path-tabbedSub1index"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "text/plain": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "string replaced successfully."
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateTabbedSub1",
+        "summary": "Update some properties of a string.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/path-tabbedServiceindex"
+          },
+          {
+            "$ref": "#/components/parameters/path-tabbedSub1index"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "text/plain": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "string updated successfully."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteTabbedSub1",
+        "summary": "Delete a string.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/path-tabbedServiceindex"
+          },
+          {
+            "$ref": "#/components/parameters/path-tabbedSub1index"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "string deleted successfully."
+          }
+        }
+      }
+    },
+    "/tabbed-service/{tabbedServiceindex}/tabbed-sub2": {
+      "get": {
+        "operationId": "getTabbedSub2List",
+        "summary": "Retrieve a list of string objects.",
+        "description": "Retrieve a list of string objects.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/query-meta"
+          },
+          {
+            "$ref": "#/components/parameters/path-tabbedServiceindex"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the list of string.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "operationId": "getOptionsForTabbedSub2List",
+        "responses": {
+          "200": {
+            "description": "List all available HTTP methods."
+          }
+        }
+      },
+      "x-bb-service": {
+        "metadata": {
+          "ui": {
+            "service-view": {
+              "href": "http://localhost:5174/custom"
+            }
+          }
+        }
+      },
+      "summary": "Operations on tabbed-sub2",
+      "description": "This service allows management of string objects.",
+      "post": {
+        "operationId": "createTabbedSub2",
+        "summary": "Creates a string object.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "text/plain": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "string successfully created."
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/path-tabbedServiceindex"
+          }
+        ]
+      }
+    },
+    "/tabbed-service/{tabbedServiceindex}/tabbed-sub2/{tabbedSub2index}": {
+      "get": {
+        "summary": "Get a string object",
+        "operationId": "getTabbedSub2",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/query-meta"
+          },
+          {
+            "$ref": "#/components/parameters/path-tabbedServiceindex"
+          },
+          {
+            "$ref": "#/components/parameters/path-tabbedSub2index"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The requested string object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "operationId": "getOptionsForTabbedSub2",
+        "responses": {
+          "200": {
+            "description": "List all available HTTP methods."
+          }
+        }
+      },
+      "put": {
+        "operationId": "replaceTabbedSub2",
+        "summary": "Replace a string.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/path-tabbedServiceindex"
+          },
+          {
+            "$ref": "#/components/parameters/path-tabbedSub2index"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "text/plain": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "string replaced successfully."
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateTabbedSub2",
+        "summary": "Update some properties of a string.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/path-tabbedServiceindex"
+          },
+          {
+            "$ref": "#/components/parameters/path-tabbedSub2index"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "text/plain": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "string updated successfully."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteTabbedSub2",
+        "summary": "Delete a string.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/path-tabbedServiceindex"
+          },
+          {
+            "$ref": "#/components/parameters/path-tabbedSub2index"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "string deleted successfully."
+          }
+        }
+      }
+    },
+    "/tabbed-service/{tabbedServiceindex}/tabbed-sub3": {
+      "get": {
+        "operationId": "getTabbedSub3List",
+        "summary": "Retrieve a list of string objects.",
+        "description": "Retrieve a list of string objects.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/query-meta"
+          },
+          {
+            "$ref": "#/components/parameters/path-tabbedServiceindex"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the list of string.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "operationId": "getOptionsForTabbedSub3List",
+        "responses": {
+          "200": {
+            "description": "List all available HTTP methods."
+          }
+        }
+      },
+      "x-bb-service": {
+        "metadata": {
+          "ui": {
+            "service-view": {
+              "href": "http://localhost:5174/custom"
+            }
+          }
+        }
+      },
+      "summary": "Operations on tabbed-sub3",
+      "description": "This service allows management of string objects.",
+      "post": {
+        "operationId": "createTabbedSub3",
+        "summary": "Creates a string object.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "text/plain": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "string successfully created."
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/path-tabbedServiceindex"
+          }
+        ]
+      }
+    },
+    "/tabbed-service/{tabbedServiceindex}/tabbed-sub3/{tabbedSub3index}": {
+      "get": {
+        "summary": "Get a string object",
+        "operationId": "getTabbedSub3",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/query-meta"
+          },
+          {
+            "$ref": "#/components/parameters/path-tabbedServiceindex"
+          },
+          {
+            "$ref": "#/components/parameters/path-tabbedSub3index"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The requested string object.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "operationId": "getOptionsForTabbedSub3",
+        "responses": {
+          "200": {
+            "description": "List all available HTTP methods."
+          }
+        }
+      },
+      "put": {
+        "operationId": "replaceTabbedSub3",
+        "summary": "Replace a string.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/path-tabbedServiceindex"
+          },
+          {
+            "$ref": "#/components/parameters/path-tabbedSub3index"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "text/plain": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "string replaced successfully."
+          }
+        }
+      },
+      "patch": {
+        "operationId": "updateTabbedSub3",
+        "summary": "Update some properties of a string.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/path-tabbedServiceindex"
+          },
+          {
+            "$ref": "#/components/parameters/path-tabbedSub3index"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "text/plain": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "string updated successfully."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteTabbedSub3",
+        "summary": "Delete a string.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/path-tabbedServiceindex"
+          },
+          {
+            "$ref": "#/components/parameters/path-tabbedSub3index"
           }
         ],
         "responses": {

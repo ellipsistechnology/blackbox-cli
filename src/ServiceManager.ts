@@ -90,7 +90,7 @@ export default class ServiceManager {
 
       // If not unique then extend the path to the object node:
       if(this.config.access !== 'unique') {
-        const objectNodePathId = this.config.name + (this.config.access === 'id' ? (this.config.identifier || 'id') : 'index')
+        const objectNodePathId = toCammelCase(this.config.name + (this.config.access === 'id' ? (this.config.identifier || 'id') : 'index'), false)
         path = path+'/{'+objectNodePathId+'}'
 
         if(this.apiManager.openapiDoc.paths[path]) {

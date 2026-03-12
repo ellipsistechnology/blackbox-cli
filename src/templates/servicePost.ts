@@ -22,6 +22,8 @@ export default function (
             } as any
         }
     } as any
+    
+    // Add request content:
     const mediaType = dataTypeToMediaTypeMap[datatype] ? dataTypeToMediaTypeMap[datatype] : 'application/json'
     postDefinition.requestBody.content[mediaType] = { "schema": makeContentSchema(datatype)}
 

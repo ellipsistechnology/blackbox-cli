@@ -64,7 +64,7 @@ export function createTabbedService(req: any, res: any, next: any) {
         .catch(err => next(err))
 }
 
-// Get the  object for '/tabbed-service/{tabbed-serviceindex}':
+// Get the  object for '/tabbed-service/{tabbedServiceindex}':
 export function getTabbedService(req: any, res: any, next: any) {
         const meta = req.query.meta
         const tabbedServiceindex = req.openapi.pathParams['tabbedServiceindex']
@@ -75,7 +75,7 @@ export function getTabbedService(req: any, res: any, next: any) {
                 .then(metadata => {res.status(200).json(metadata); next()})
                 .catch(err => next(err))
             } else {
-                next(new NotFound("Metadata is not available for this object."))
+                res.status(200).json(makeServiceList(req, wrapper.openapiDoc))
             }
         } else {
             if(typeof wrapper.service.getTabbedService !== 'function') {

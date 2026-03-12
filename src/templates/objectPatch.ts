@@ -1,4 +1,4 @@
-import { makeContentSchema } from "../utils.js"
+import { dataTypeToMediaTypeMap, makeContentSchema } from "../utils.js"
 
 export default function (
     { operationId, datatype, pathParams }:
@@ -14,18 +14,18 @@ export default function (
         "parameters": [] as any[],
         "requestBody": {
             "required": true,
-            "content": {
-                "application/json": {
-                    "schema": makeContentSchema(datatype)
-                }
-            }
+            "content": {}
         },
         "responses": {
             "200": {
                 "description": `${datatype} updated successfully.`,
             }
         }
-    }
+    };
+
+    // Add request content:
+    const mediaType = dataTypeToMediaTypeMap[datatype] || 'application/json';
+    (<any>patchDefinition.requestBody.content)[mediaType] = { "schema": makeContentSchema(datatype) }
 
     // Add id/index parameter if needed:
     if(pathParams) {

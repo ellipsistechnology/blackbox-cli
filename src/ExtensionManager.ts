@@ -166,6 +166,9 @@ export default class ExtensionManager {
         )
         
         // Add extension to the blackbox.json file:
+        if(!this.serverManager.bbDoc.extensions) {
+            this.serverManager.bbDoc.extensions = []
+        }
         this.serverManager.bbDoc.extensions.push(extensionDefinition)
         this.serverManager.writeConfigJson()
         logem("Extension added from file "+this.config.file)

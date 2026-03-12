@@ -1,5 +1,8 @@
 import {serviceClass, autowired} from 'ellipsis-ioc'
 
+const stringList: string[] = [
+  'Hello!'
+]
 
 @serviceClass('tabbed-service')
 export class TabbedServiceService {
@@ -8,29 +11,31 @@ export class TabbedServiceService {
   openapiDoc:any
 
   constructor() {
+  
+    
   }
   
   getTabbedServiceList(): string[] {
-    throw new Error(`getTabbedServiceList not yet implemented.`)
+    return stringList
   }
 
   createTabbedService({data}: {data: any}): void {
-    throw new Error(`createTabbedService not yet implemented.`)
+    stringList.push(data)
   }
 
   getTabbedService({tabbedServiceindex}: {tabbedServiceindex: number}): string {
-    throw new Error(`getTabbedService not yet implemented.`)
+    return stringList[tabbedServiceindex]
   }
 
   replaceTabbedService({tabbedServiceindex, data}: {tabbedServiceindex: number, data: any}): void {
-    throw new Error(`replaceTabbedService not yet implemented.`)
+    stringList[tabbedServiceindex] = data
   }
 
   updateTabbedService({tabbedServiceindex, data}: {tabbedServiceindex: number, data: any}): void {
-    throw new Error(`updateTabbedService not yet implemented.`)
+    stringList[tabbedServiceindex] = data
   }
 
   deleteTabbedService({tabbedServiceindex}: {tabbedServiceindex: number}): void {
-    throw new Error(`deleteTabbedService not yet implemented.`)
+    stringList.splice(tabbedServiceindex, 1)
   }
 }

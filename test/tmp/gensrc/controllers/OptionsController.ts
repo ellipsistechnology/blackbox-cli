@@ -123,3 +123,81 @@ export function getOptionsForTabbedService(req: any, res: any) {
         .filter(method => ['get', 'post', 'put', 'patch', 'delete', 'options'].includes(method.toLowerCase()))
     res.status(200).set("Allow", opts).json({})
 }
+
+export function getOptionsForTabbedSub1List(req: any, res: any) {
+    // Manually add the CORS headers.
+    // Required due to a bug in swagger-tools-oas3:
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS, PUT, DELETE')
+    res.setHeader('Access-Control-Allow-Headers', 'Allow, Content-Type, Authorization')
+    res.setHeader('Access-Control-Expose-Headers', 'Allow, Content-Type, Authorization')
+    
+    const opts = Object.keys(wrapper.openapiDoc.paths[req.openapi.openApiRoute])
+        .filter(method => ['get', 'post', 'put', 'patch', 'delete', 'options'].includes(method.toLowerCase()))
+    res.status(200).set("Allow", opts).json({})
+}
+
+export function getOptionsForTabbedSub1(req: any, res: any) {
+    // Manually add the CORS headers.
+    // Required due to a bug in swagger-tools-oas3:
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS, PUT, DELETE')
+    res.setHeader('Access-Control-Allow-Headers', 'Allow, Content-Type, Authorization')
+    res.setHeader('Access-Control-Expose-Headers', 'Allow, Content-Type, Authorization')
+    
+    const opts = Object.keys(wrapper.openapiDoc.paths[req.openapi.openApiRoute])
+        .filter(method => ['get', 'post', 'put', 'patch', 'delete', 'options'].includes(method.toLowerCase()))
+    res.status(200).set("Allow", opts).json({})
+}
+
+export function getOptionsForTabbedSub2List(req: any, res: any) {
+    // Manually add the CORS headers.
+    // Required due to a bug in swagger-tools-oas3:
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS, PUT, DELETE')
+    res.setHeader('Access-Control-Allow-Headers', 'Allow, Content-Type, Authorization')
+    res.setHeader('Access-Control-Expose-Headers', 'Allow, Content-Type, Authorization')
+    
+    const opts = Object.keys(wrapper.openapiDoc.paths[req.openapi.openApiRoute])
+        .filter(method => ['get', 'post', 'put', 'patch', 'delete', 'options'].includes(method.toLowerCase()))
+    res.status(200).set("Allow", opts).json({})
+}
+
+export function getOptionsForTabbedSub2(req: any, res: any) {
+    // Manually add the CORS headers.
+    // Required due to a bug in swagger-tools-oas3:
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS, PUT, DELETE')
+    res.setHeader('Access-Control-Allow-Headers', 'Allow, Content-Type, Authorization')
+    res.setHeader('Access-Control-Expose-Headers', 'Allow, Content-Type, Authorization')
+    
+    const opts = Object.keys(wrapper.openapiDoc.paths[req.openapi.openApiRoute])
+        .filter(method => ['get', 'post', 'put', 'patch', 'delete', 'options'].includes(method.toLowerCase()))
+    res.status(200).set("Allow", opts).json({})
+}
+
+export function getOptionsForTabbedSub3List(req: any, res: any) {
+    // Manually add the CORS headers.
+    // Required due to a bug in swagger-tools-oas3:
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS, PUT, DELETE')
+    res.setHeader('Access-Control-Allow-Headers', 'Allow, Content-Type, Authorization')
+    res.setHeader('Access-Control-Expose-Headers', 'Allow, Content-Type, Authorization')
+    
+    const opts = Object.keys(wrapper.openapiDoc.paths[req.openapi.openApiRoute])
+        .filter(method => ['get', 'post', 'put', 'patch', 'delete', 'options'].includes(method.toLowerCase()))
+    res.status(200).set("Allow", opts).json({})
+}
+
+export function getOptionsForTabbedSub3(req: any, res: any) {
+    // Manually add the CORS headers.
+    // Required due to a bug in swagger-tools-oas3:
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, OPTIONS, PUT, DELETE')
+    res.setHeader('Access-Control-Allow-Headers', 'Allow, Content-Type, Authorization')
+    res.setHeader('Access-Control-Expose-Headers', 'Allow, Content-Type, Authorization')
+    
+    const opts = Object.keys(wrapper.openapiDoc.paths[req.openapi.openApiRoute])
+        .filter(method => ['get', 'post', 'put', 'patch', 'delete', 'options'].includes(method.toLowerCase()))
+    res.status(200).set("Allow", opts).json({})
+}
