@@ -19,6 +19,7 @@ export class TabbedServiceService {
 
   createTabbedService({data}: {data: any}): void {
     stringList.push(data)
+    return {index: stringList.length-1}
   }
 
   getTabbedService({tabbedServiceindex}: {tabbedServiceindex: number}): string {

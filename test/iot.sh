@@ -100,13 +100,15 @@ node ../../dist/index.js add com-macro -n com1 -p /comm --method delete --comman
 # TODO: Test timeout and return to background with invalid command with no response.
 node ../../dist/index.js generate com-utils
 
-# FIXME: hyphens don't work in swagger-tools-oas3. Replace hyphens.
+# FIXME: Tabbed display should be at the object level since only objects can have sub-services.
+# FIXME: Custom displays should be allowed at either service or object nodes.
+# TODO: Test ui:{\"auto-open-single\":\"true\"}
 echo
 echo Testing metadata with UI hints and testing hyphenated service names...
 node ../../dist/index.js add service \
     -n tabbed-service \
     -d string \
-    --meta "{\"ui\":{\"subservice-display\":\"tabs\",\"auto-open-single\":\"true\"}}"
+    --meta "{\"ui\":{\"subservice-display\":\"tabs\"}}"
 
 node ../../dist/index.js add service \
     -n tabbed-sub1 \

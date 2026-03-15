@@ -109,7 +109,11 @@ function pathParamReplace(path: string, pathParams: any): string {
 function convertSchemaPathsToURLs(schema: any, baseUrl: string): {href: string} | OpenAPISchema | undefined {
     if(schema.type === 'array' && schema.items?.['$ref'] && typeof schema.items['$ref'] === 'string' && schema.items['$ref'].startsWith('#/')) {
         return {href: baseUrl + schema.items['$ref']}
-    } 
+    } else if(schema.type === 'array' && schema.items) {
+        return convertSchemaPathsToURLs(schema.items, baseUrl)
+    } else {
+        return schema
+    }
     // TODO: Check for $ref without array - should never happen since we're only this for services which always return arrays
     // TODO: If not a ref, and type is object, recursively check properties - should never happen since we're only this for services which always return arrays
     // TODO: If not a ref, and type is array, recursively check items

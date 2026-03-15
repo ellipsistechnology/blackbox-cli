@@ -793,8 +793,7 @@
       "x-bb-service": {
         "metadata": {
           "ui": {
-            "subservice-display": "tabs",
-            "auto-open-single": "true"
+            "subservice-display": "tabs"
           }
         }
       },
