@@ -11,6 +11,7 @@ export interface TemplateMap {
 }
 
 function methodType(oasDoc: any, path: string, method: string, schemaToClass: { [key:string]: string }): string {
+  
   // If there is no response content then default to 'void':
   if(!oasDoc.paths[path][method].responses?.['200']?.content) {    
     return 'void'
@@ -69,7 +70,7 @@ export default function (openapiDoc: any, {serviceName, methods}:TemplateMap):st
   let imports = ''
   new Set(methods // use a set to remove duplicates
     .map(method => methodType(openapiDoc, method.path, method.method, schemaToClass)) // extract types from methods
-    .filter(type => type) // remove empty - shouldn't happen???
+    .filter(type => type && !type.startsWith('{')) // remove empty or ad hoc types
     .map((type:string) => type.endsWith('[]') ? type.substring(0, type.length-2) : type) // remove array brackets for import statements
     .filter(type => !jsonTypes.includes(type)) // remove primitives
     .reduce((classes, type) => classes.concat(type.split('&')), <string[]>[]) // split Type1&Type2

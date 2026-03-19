@@ -1,6 +1,6 @@
 import {serviceClass, autowired} from 'ellipsis-ioc'
 
-const strings = [
+export const strings = [
   ["T0"]
 ]
 
@@ -23,7 +23,11 @@ export class TabbedSub1Service {
   }
 
   getTabbedSub1({tabbedServiceindex, tabbedSub1index}: {tabbedServiceindex: number, tabbedSub1index: number}): string {
-    return strings[tabbedServiceindex][tabbedSub1index]
+    const subVal = strings[tabbedServiceindex][tabbedSub1index]
+    if(!subVal) {
+      throw new Error(`TabbedSub1 not found at index ${tabbedSub1index} for service index ${tabbedServiceindex}`)
+    }
+    return subVal
   }
 
   replaceTabbedSub1({tabbedServiceindex, tabbedSub1index, data}: {tabbedServiceindex: number, tabbedSub1index: number, data: any}): void {

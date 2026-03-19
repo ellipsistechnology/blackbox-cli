@@ -814,7 +814,14 @@
         },
         "responses": {
           "200": {
-            "description": "string successfully created."
+            "description": "string successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/index-response"
+                }
+              }
+            }
           }
         },
         "parameters": []
@@ -979,7 +986,14 @@
         },
         "responses": {
           "200": {
-            "description": "string successfully created."
+            "description": "string successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/index-response"
+                }
+              }
+            }
           }
         },
         "parameters": [
@@ -1160,7 +1174,14 @@
         },
         "responses": {
           "200": {
-            "description": "string successfully created."
+            "description": "string successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/index-response"
+                }
+              }
+            }
           }
         },
         "parameters": [
@@ -1315,15 +1336,7 @@
           }
         }
       },
-      "x-bb-service": {
-        "metadata": {
-          "ui": {
-            "service-view": {
-              "href": "http://localhost:5174/custom"
-            }
-          }
-        }
-      },
+      "x-bb-service": {},
       "summary": "Operations on tabbed-sub3",
       "description": "This service allows management of string objects.",
       "post": {
@@ -1341,7 +1354,14 @@
         },
         "responses": {
           "200": {
-            "description": "string successfully created."
+            "description": "string successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/index-response"
+                }
+              }
+            }
           }
         },
         "parameters": [

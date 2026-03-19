@@ -54,7 +54,7 @@ export function createLocation(req: any, res: any, next: any) {
         Promise.resolve(wrapper.service.createLocation({data: req.body, }))
         .then(data => {
             // Check for id or index in body and return 500 if not present:
-            if(data.name === undefined) {
+            if(!data || data.name === undefined) {
                 next(new InternalServerError("Service did not return the name of the created object."))
             } else {
                 res.status(201).json(data)

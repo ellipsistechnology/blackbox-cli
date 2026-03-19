@@ -1,6 +1,6 @@
 import {serviceClass, autowired} from 'ellipsis-ioc'
 
-const strings = [
+export const strings = [
   ["T0"]
 ]
 

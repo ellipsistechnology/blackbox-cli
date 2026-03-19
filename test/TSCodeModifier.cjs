@@ -127,7 +127,8 @@ class TSCodeModifier {
    */
   replaceMethodBodies(source, methodMap) {
     // Find the first backet of each method and replace the body with the corresponding body from the method map:
-    const methodRegex = /(\w+)\s*\(([^)]*)\)\s*:\s*[\w<>\[\]]+\s*{/g
+    // (\w+)\s*\(([^)]*)\)\s*:\s*[\w<>\[\]\{\}:]+\s*{[\n\r]+
+    const methodRegex = /(\w+)\s*\(([^)]*)\)\s*:.+{/g
     let modifiedSource = ''
     let match
     let index = 0

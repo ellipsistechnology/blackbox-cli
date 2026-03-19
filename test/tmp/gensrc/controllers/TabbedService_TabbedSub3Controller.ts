@@ -54,7 +54,7 @@ export function createTabbedSub3(req: any, res: any, next: any) {
         Promise.resolve(wrapper.service.createTabbedSub3({data: req.body, tabbedServiceindex}))
         .then(data => {
             // Check for id or index in body and return 500 if not present:
-            if(data.index === undefined) {
+            if(!data || data.index === undefined) {
                 next(new InternalServerError("Service did not return the index of the created object."))
             } else {
                 res.status(201).json(data)

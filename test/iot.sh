@@ -100,8 +100,8 @@ node ../../dist/index.js add com-macro -n com1 -p /comm --method delete --comman
 # TODO: Test timeout and return to background with invalid command with no response.
 node ../../dist/index.js generate com-utils
 
-# FIXME: Tabbed display should be at the object level since only objects can have sub-services.
-# FIXME: Custom displays should be allowed at either service or object nodes.
+# FIXME: Custom displays should be allowed at either service or object nodes. 
+#        But they should still be defined in the service metadata since we can't quesry an object node to get metadata without querying a specific object.
 # TODO: Test ui:{\"auto-open-single\":\"true\"}
 echo
 echo Testing metadata with UI hints and testing hyphenated service names...
@@ -125,8 +125,7 @@ node ../../dist/index.js add service \
 node ../../dist/index.js add service \
     -n tabbed-sub3 \
     -d string \
-    -p /tabbed-service/# \
-    --meta "{\"ui\":{\"service-view\": { \"href\": \"http://localhost:5174/custom\" }}}"
+    -p /tabbed-service/#
 
 node ../../dist/index.js generate service
 node ../../dist/index.js generate server

@@ -1,4 +1,5 @@
 import {serviceClass, autowired} from 'ellipsis-ioc'
+import IndexResponse from '../gensrc/IndexResponse.js'
 import {strings as sub1} from './TabbedSub1Service.js'
 import {strings as sub2} from './TabbedSub2Service.js'
 import {strings as sub3} from './TabbedSub3Service.js'
@@ -13,13 +14,16 @@ export class TabbedServiceService {
   @autowired('openapi-doc')
   openapiDoc:any
 
-  constructor() {}
+  constructor() {
+  
+    
+  }
   
   getTabbedServiceList(): string[] {
     return stringList
   }
 
-  createTabbedService({data}: {data: any}): any {
+  createTabbedService({data}: {data: any}): IndexResponse {
     stringList.push(data)
     sub1.push([])
     sub2.push([])

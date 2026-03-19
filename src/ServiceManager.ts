@@ -312,7 +312,7 @@ export default class ServiceManager {
       this.config.identifier = 'id' // default to 'id' if not provided
       logp(`No identifier provided. Defaulting to 'id'.`)
     }
-    const idResponseSchemaName = this.config.name + '-' + this.config.identifier //this.makeIdResponseSchemaName(path)
+    const idResponseSchemaName = this.config.name + '-' + (this.config.identifier ?? 'id')
 
     if(this.config.access === 'id') {
       // Check that the schema includes the identifier:
@@ -337,9 +337,10 @@ export default class ServiceManager {
       datatype: this.config.datatype!,
       pathParams: extractPathParams(path),
       responseSchema: 
-        this.config.access === 'index'   ? 'index-response' : 
-        this.config.access === 'id'      ? idResponseSchemaName :
-                            /* 'unique' */ ''
+        this.config.access === 'unique' ?  '' :                   // Unique returns nothing.
+        this.config.access === 'id'     ?  idResponseSchemaName : // ID returns an id response schema with the identifier
+        /*this.config.access === 'index'*/ 'index-response'       // Index returns an index response schema. - default
+        
     })
     logp(`Added ${code('post')} to path ${code(path)}`)
 

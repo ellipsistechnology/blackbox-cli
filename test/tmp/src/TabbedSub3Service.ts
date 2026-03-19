@@ -1,4 +1,5 @@
 import {serviceClass, autowired} from 'ellipsis-ioc'
+import IndexResponse from '../gensrc/IndexResponse.js'
 
 export const strings = [
   ["T0"]
@@ -11,13 +12,15 @@ export class TabbedSub3Service {
   openapiDoc:any
 
   constructor() {
+  
+    
   }
   
   getTabbedSub3List({tabbedServiceindex}: {tabbedServiceindex: number}): string[] {
     return strings[tabbedServiceindex]
   }
 
-  createTabbedSub3({tabbedServiceindex, data}: {tabbedServiceindex: number, data: any}): any {
+  createTabbedSub3({tabbedServiceindex, data}: {tabbedServiceindex: number, data: any}): IndexResponse {
     strings[tabbedServiceindex].push(data)
     return {index: strings[tabbedServiceindex].length-1}
   }
