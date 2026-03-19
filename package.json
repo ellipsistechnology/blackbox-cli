@@ -1,16 +1,21 @@
 {
   "name": "blackbox-cli",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "description": "Blackbox command line interface.",
   "type": "module",
   "main": "dist/index.js",
+  "bin": {
+    "bb": "dist/index.js",
+    "blackbox-cli": "dist/index.js"
+  },
   "scripts": {
     "test-old": "npm run clean && npm run build && cd test && ./test.sh",
     "test": "jest",
     "dev": "node --loader ts-node/esm ./index.ts",
     "dev-build": "nodemon",
     "start": "node ./dist/index.js",
-    "build": "tsc"
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",
@@ -21,7 +26,7 @@
   "bugs": {
     "url": "https://github.com/ellipsistechnology/blackbox-cli/issues"
   },
-  "homepage": "https://github.com/ellipsistechnology/blackbox-cli#readme",
+  "homepage": "http://ellipsis.technology/blackbox",
   "dependencies": {
     "chalk": "^5.6.2",
     "commander": "^14.0.1",

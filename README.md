@@ -20,7 +20,13 @@ For further information about the Blackbox Specification refer to the Blackbox w
 ## Install
 
 ```
-npm i -g bb@npm:blackbox-cli
+npm i -g blackbox-cli
+```
+
+or run without global install:
+
+```
+npx blackbox-cli <command>
 ```
 
 ## Usage
