@@ -103,7 +103,7 @@ export default class ServiceManager {
           in: "path",
           name: objectNodePathId,
           required: true,
-          schema: { type: "string" },
+          schema: { type: this.config.access === 'id' ? 'string' : 'number' }, // index access must be by a number
           description: `The ${objectNodePathId} of the ${this.config.datatype}.`
         }
 

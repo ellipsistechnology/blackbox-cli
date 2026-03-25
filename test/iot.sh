@@ -89,10 +89,11 @@ echo Testing COM extension:
 
 node ../../dist/index.js add com-type \
     -n com1 \
+    -p "/comm" \
     --baud 9600 \
     --startup-delay 2000\
     --init-commands "INFO" \
-    --init-responses "/MOCK\sDEVICE\sV\d+.?\d*[\n\r]+STATUS: OK[\n\r]+CMD DONE$/" -p "/comm"
+    --init-responses "/MOCK\sDEVICE\sV\d+.?\d*[\n\r]+STATUS: OK[\n\r]+CMD DONE$/"
 
 node ../../dist/index.js add com-macro -n com1 -p /comm --method get --commands "GET DATA" --responses "/CMD DONE$/"
 node ../../dist/index.js add com-macro -n com1 -p /comm --method post --commands "SET DATA {data}" --responses "/CMD DONE$/"
