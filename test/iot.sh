@@ -6,10 +6,12 @@ echo Creating IoT test service...
 mkdir tmp
 cd tmp
 
+# TODO: Include version:
 node ../../dist/index.js init \
     --name iot \
     --title "IoT Test Service" \
     --desc "IoT example with unique, index, id services and sub-service."
+# TODO: Return server info based on the above when GETting the root service.
 
 echo
 echo Adding repository...

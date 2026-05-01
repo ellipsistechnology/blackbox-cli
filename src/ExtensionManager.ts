@@ -49,7 +49,7 @@ export default class ExtensionManager {
             try {
                 // Try to resolve the package from project directory:
                 const searchPaths = [process.cwd()]
-                const resolvedPath = require.resolve(this.config.path, { paths: searchPaths })
+                const resolvedPath = require.resolve(this.config.path, { paths: searchPaths }) // FIXME: This needs to be relative to the project directory, not specific to the current user.
                 extensionDefinition.path = resolvedPath
                 extModule = await import(resolvedPath)
             } catch (e) {

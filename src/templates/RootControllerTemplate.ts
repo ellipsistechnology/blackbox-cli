@@ -1,3 +1,4 @@
+// TODO: Implement info as per spec.
 export default function () {
     return`import { autowired, autowiredService } from "ellipsis-ioc"
 import { ServiceList } from "../blackbox-utils.js";
