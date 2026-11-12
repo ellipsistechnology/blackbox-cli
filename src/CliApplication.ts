@@ -48,7 +48,6 @@ export default class CliApplication {
 
   async run() {
     // TODO allow running from any subdirectory.
-    // TODO allow plugin commands (store in blackbox.json) - e.g. bb init rules; bb add database; bb add authentication
 
     // No args defaults to help:
     if(this.args.length <= 0) {
@@ -70,19 +69,20 @@ export default class CliApplication {
         logerror(`Please provide a type for ${commandString}.`)
         return
       }
-      if(!(<any>Object.keys(Types)).includes(this.args[1])) {
-        // Try extensions:
+
+      // If type is not recognised or the target framework is not Typescript, 
+      // try to find an extension to handle it:
+      if(!(<any>Object.keys(Types)).includes(this.args[1]) || (this.options.framework !== undefined && this.options.framework !== 'ts')) {
         const type = this.args[1]
         const serverManager = new ServerManager(this.options)
         await serverManager.loadConfigJson()
         await serverManager.loadOpenApiJson()
-        const extension = await new ExtensionManager(this.options, serverManager).getManager(type)
+        let extension = await new ExtensionManager(this.options, serverManager).getManager(type)
         if(extension && typeof extension.generate === 'function') {
           await extension.generate(type)
-          return
+        } else {
+          logerror(`Generate is not applicable to type '${this.args[1]}' ${this.options.framework ? "with framework '"+this.options.framework : ""}'.`)
         }
-
-        logerror(`Generate is not applicable to type '${this.args[1]}'`)
         return
       }
       const type = Types[this.args[1] as keyof typeof Types]

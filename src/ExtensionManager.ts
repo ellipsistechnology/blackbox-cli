@@ -202,7 +202,9 @@ export default class ExtensionManager {
         }
         
         for(const extInfo of this.serverManager.bbDoc.extensions) {
-            if(Object.keys(extInfo.types).includes(type)) {
+
+            // Check if the extension handles the type and framework:
+            if(Object.keys(extInfo.types).includes(type) && (this.config.framework === undefined || extInfo.frameworks?.includes(this.config.framework))) {
                 if(!fs.existsSync(extInfo.path)) { 
                     logerror("Extension file "+extInfo.path+" not found.")
                     return null

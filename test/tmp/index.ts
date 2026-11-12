@@ -14,7 +14,7 @@ const __filename = fileURLToPath(import.meta.url);
 export const __dirname = dirname(__filename);
 // ----------------------------------------------------
 
-const serverPort = 3300;
+const serverPort = 3000;
 const searchPaths = [
     path.join(__dirname, 'src/**/*').replaceAll('\\', '/'),
     path.join(__dirname, 'gensrc/**/*').replaceAll('\\', '/')

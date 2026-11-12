@@ -31,7 +31,7 @@
         "name": "deviceindex",
         "required": true,
         "schema": {
-          "type": "string"
+          "type": "number"
         },
         "description": "The deviceindex of the iot-device."
       },
@@ -40,7 +40,7 @@
         "name": "tabbedServiceindex",
         "required": true,
         "schema": {
-          "type": "string"
+          "type": "number"
         },
         "description": "The tabbedServiceindex of the string."
       },
@@ -49,7 +49,7 @@
         "name": "tabbedSub1index",
         "required": true,
         "schema": {
-          "type": "string"
+          "type": "number"
         },
         "description": "The tabbedSub1index of the string."
       },
@@ -58,7 +58,7 @@
         "name": "tabbedSub2index",
         "required": true,
         "schema": {
-          "type": "string"
+          "type": "number"
         },
         "description": "The tabbedSub2index of the string."
       },
@@ -67,7 +67,7 @@
         "name": "tabbedSub3index",
         "required": true,
         "schema": {
-          "type": "string"
+          "type": "number"
         },
         "description": "The tabbedSub3index of the string."
       }

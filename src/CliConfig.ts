@@ -47,6 +47,7 @@ export default class CliConfig {
     	.option('--summary <summary>', "Summary for a service.")
       .option('-v, --verbose', "Display verbose output.")
       .option('--meta <metadata>', "Static metadata for a service in JSON format.")
+      .option('--framework <framework>', "The target framework for code generation.")
     
     // Add options from extensions:
     const serverManager = new ServerManager(this)
