@@ -77,6 +77,7 @@ bb command [type] [options]
  |`--summary <summary>`            | Summary for a service.
  |`-v, --verbose`                  | Display verbose output.
  |`--meta <metadata>`              | Static metadata for a service in JSON format.
+ |`--framework <framework>`        | The target framework for code generation.
 
 ## Examples
 
