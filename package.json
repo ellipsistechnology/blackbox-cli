@@ -1,6 +1,6 @@
 {
   "name": "blackbox-cli",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "Blackbox command line interface.",
   "type": "module",
   "main": "dist/index.js",
